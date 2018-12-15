@@ -1,2 +1,2 @@
 
-prettyjekyll::FormatPost("_knitr/knitr-minimal.Rmd")
+#prettyjekyll::FormatPost("_knitr/knitr-minimal.Rmd")
