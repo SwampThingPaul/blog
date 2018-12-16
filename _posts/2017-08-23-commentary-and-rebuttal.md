@@ -26,11 +26,11 @@ layout: post
 <li><p>Julian (2017) did not assess the water quality within UTS against the 10 <span class="math inline">\(\mu g/L\)</span> metric. Instead, the author used the number simply as a point of reference for oligotrophic wetlands (as stated in the beginning of the introduction). The reference to the 6 <span class="math inline">\(\mu g/L\)</span> TP flow-weighted mean target is just that a target. In water quality standard parlance, Achievement of a concentration limit should result in attainment of a long-term target concentration, therefore limits and targets are not one in the same.</p></li>
 <li><p>The monitoring station P-37 is located in the lower TS area, approximately 15 km south of TSB, therefore using P-37 as a comparison to the UTS region is tenuous. Furthermore, evaluation of annual geometric mean TP concentration at P-37 yielded very few annual geometric mean concentrations at or below 2 <span class="math inline">\(\mu g/L\)</span>, therefore considering this concentration representative of background is not supportable quantitatively. Moreover, in recent years, water quality of a station located approximately 10 km upstream of TSB experienced concentrations consistent with those observed at TSB. Attributing background concentrations based on less than 10% of the data below 2 <span class="math inline">\(\mu g/L\)</span>, located several kilometers from the area of interest and located in a completely different region with different forcing factors is not an appropriate estimation of background concentration rather characterization of ambient conditions of that particular region.</p></li>
 </ul>
-<img src="{{ site.url }}{{ site.baseurl }}\images\20170823_TSMap.jpg" width="50%" style="display: block; margin: auto;" />
+<img src="{{ site.url }}{{ site.baseurl }}\images\20170823_TSMap.jpg" width="80%" style="display: block; margin: auto;" />
 <center>
 Map of regional ambient and legally mandated monitoring.
 </center>
-<br> <br> <img src="{{ site.url }}{{ site.baseurl }}\images\20170823_TPPlot.jpg" width="50%" style="display: block; margin: auto;" />
+<br> <br> <img src="{{ site.url }}{{ site.baseurl }}\images\20170823_TPPlot.jpg" width="80%" style="display: block; margin: auto;" />
 <center>
 Annual geometric mean TP concentration for three marsh stations within the regional Taylor Slough system.
 </center>

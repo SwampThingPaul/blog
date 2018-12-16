@@ -36,14 +36,14 @@ The rebuttal attempts to address Surratt et al (In Press) major points with some
 * The monitoring station P-37 is located in the lower TS area, approximately 15 km south of TSB, therefore using P-37 as a comparison to the UTS region is tenuous.  Furthermore, evaluation of annual geometric mean TP concentration at P-37 yielded very few annual geometric mean concentrations at or below 2 $\mu g/L$, therefore considering this concentration representative of background is not supportable quantitatively. Moreover, in recent years, water quality of a station located approximately 10 km upstream of TSB experienced concentrations consistent with those observed at TSB. Attributing background concentrations based on less than 10% of the data below 2 $\mu g/L$, located several kilometers from the area of interest and located in a completely different region with different forcing factors is not an appropriate estimation of background concentration rather characterization of ambient conditions of that particular region.
 
 
-```{r 1, out.width="50%",echo=FALSE,fig.align="center"}
+```{r 1, out.width="80%",echo=FALSE,fig.align="center"}
 knitr::include_graphics("../images/20170823_TSMap.jpg")
 ```
 <center>Map of regional ambient and legally mandated monitoring.</center>
 
 <br>
 <br>
-```{r 2, out.width="50%",echo=FALSE,fig.align="center"}
+```{r 2, out.width="80%",echo=FALSE,fig.align="center"}
 knitr::include_graphics("../images/20170823_TPPlot.jpg")
 ```
 <center>
