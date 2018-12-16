@@ -7,15 +7,11 @@ output:
     highlight: github
 ---
 
-Originally this blog post was originally posted on [Aquatic Thoughts...](https://wetlandbiogeochem.weebly.com/aquatic-thoughts).
+Originally this blog post was originally posted on [Aquatic Thoughts...](https://wetlandbiogeochem.weebly.com/aquatic-thoughts). 
 
 ***
-<!--
-<div class="figure">
-<img src="..images/PuertoRico_ForestOcean.jpeg"  width="50%" align="center">
-<p class="caption">Seeing the trees through the tropical forest, San Juan, Puerto Rico.</p>
-</div>
---->
+
+
 ```{r, out.width="50%",echo=FALSE,fig.align="center"}
 knitr::include_graphics("../images/PuertoRico_ForestOcean.jpeg")
 ```
@@ -33,5 +29,9 @@ In the past I have had less than fulfilling interactions with eminent scholars. 
 Moral of the story...and the good ones already know this (you know who you are)... is if you make it big don't develop an ego and always take the time to foster friendships and encourage young scientists. After all, if your as big as you make yourself out to be you have become an officially/unofficially ambassador to your field and having an environment of inclusivity only strengthens your field.  
 
 Now I will leave you all with a question, if you were able to have a beer with a minimum of three scholars (living or dead) who would they be and why? Narrowing it down to just a couple is rather difficult but here is my list.
+
+1. Howard T. Odum, being the father of systems ecology and my great-great-grand advsior (from my masters degree). What student of ecology hasn't  wanted to talk to H.T Odum or any of the other Odum brothers?
+2. George E. Hutchinson,  the father of modern ecology. I was gifted "The Treaties of Limnology" (vol 1,2 and 3) written by Hutchinson. The easiest way to explain this series of books is it is limnological poetry. 
+3. this one is hard...its a toss up between Robert Wetzel (limnologist and aquatic biogeochemist), James J Elser, Robert W. Sterner (pioneers of modern [ecological stoichiometry](http://press.princeton.edu/titles/7434.html)) or Walter Dobbs (stream ecologist and aquatic bioegeochemist).
 
 ***
