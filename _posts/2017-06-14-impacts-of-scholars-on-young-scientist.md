@@ -11,7 +11,7 @@ layout: post
 <p>Originally this blog post was originally posted on <a href="https://wetlandbiogeochem.weebly.com/aquatic-thoughts">Aquatic Thoughts…</a>.</p>
 <hr />
 <div class="figure">
-<img src=...images/PuertoRico_ForestOcean.jpeg"  width="50%" align="center">
+<img src={{ site.url }}{{ site.baseurl }}\images\PuertoRico_ForestOcean.jpeg"  width="50%" align="center">
 <p class="caption">
 Seeing the trees through the tropical forest, San Juan, Puerto Rico.
 </p>
