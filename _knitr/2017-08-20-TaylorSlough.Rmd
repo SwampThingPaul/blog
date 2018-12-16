@@ -1,6 +1,6 @@
 ---
 title: "Publication Summary of “Assessment of Upper Taylor Slough...”"
-date: "June 14, 2017"
+date: "August 20, 2017"
 output: 
   prettydoc::html_pretty:
   theme: cayman
