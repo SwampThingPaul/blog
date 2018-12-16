@@ -12,7 +12,7 @@ Originally this blog post was originally posted on [Aquatic Thoughts...](https:/
 ***
 
 <div class="figure">
-<img src=images/PuertoRico_ForestOcean.jpeg"  width="50%" align="center">
+<img src=...images/PuertoRico_ForestOcean.jpeg"  width="50%" align="center">
 <p class="caption">Seeing the trees through the tropical forest, San Juan, Puerto Rico.</p>
 </div>
 
