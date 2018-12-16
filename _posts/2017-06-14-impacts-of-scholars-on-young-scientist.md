@@ -10,12 +10,16 @@ layout: post
 <section class="main-content">
 <p>Originally this blog post was originally posted on <a href="https://wetlandbiogeochem.weebly.com/aquatic-thoughts">Aquatic Thoughts…</a>.</p>
 <hr />
+<!--
 <div class="figure">
-<img src={{ site.url }}{{ site.baseurl }}\images\PuertoRico_ForestOcean.jpeg"  width="50%" align="center">
-<p class="caption">
-Seeing the trees through the tropical forest, San Juan, Puerto Rico.
-</p>
+<img src="{{ site.url }}{{ site.baseurl }}\_knitr\..images\PuertoRico_ForestOcean.jpeg"  width="50%" align="center">
+<p class="caption">Seeing the trees through the tropical forest, San Juan, Puerto Rico.</p>
 </div>
+--->
+<img src="{{ site.url }}{{ site.baseurl }}\images\PuertoRico_ForestOcean.jpeg" width="50%" style="display: block; margin: auto;" />
+<center>
+Seeing the trees through the tropical forest, San Juan, Puerto Rico.
+</center>
 <p><br> Last week I was fortunate enough to attend the 2017 Society of Wetland Scientist (<a href="sws.org">SWS</a>) annual meeting in San Juan Puerto Rico. As usual the conference was an amazing gather of wetland and aquatic scientists from all around the globe discussing the various types and facets of wetland ecology, management and policy.</p>
 <p>All week I have been reflecting on my time at the conference, tonight while preparing dinner (vegan cabbage kofta) I took a deeper reflection on the meeting. Over the past several years (10 + years) I have read countless journal articles on wetlands, biogeochemistry, hydrology, modeling, etc. Through all this reading I was bound to come across several names more than once. This is true for any field.</p>
 <p>I am lucky in that I get the chance to collaborate with some of the best in the field of wetland ecology, biology, biogeochemistry, management and policy with my experience related to Everglades science and policy both as part of my position as the Florida Department of Environmental Protection and as part of my studies with the University of Florida. I am truly gifted to be in the company such amazing scientists.</p>

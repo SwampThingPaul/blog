@@ -10,11 +10,16 @@ output:
 Originally this blog post was originally posted on [Aquatic Thoughts...](https://wetlandbiogeochem.weebly.com/aquatic-thoughts).
 
 ***
-
+<!--
 <div class="figure">
-<img src=...images/PuertoRico_ForestOcean.jpeg"  width="50%" align="center">
+<img src="..images/PuertoRico_ForestOcean.jpeg"  width="50%" align="center">
 <p class="caption">Seeing the trees through the tropical forest, San Juan, Puerto Rico.</p>
 </div>
+--->
+```{r, out.width="50%",echo=FALSE,fig.align="center"}
+knitr::include_graphics("../images/PuertoRico_ForestOcean.jpeg")
+```
+<center>Seeing the trees through the tropical forest, San Juan, Puerto Rico.</center>
 
 <br>
 Last week I was fortunate enough to attend the 2017 Society of Wetland Scientist ([SWS](sws.org)) annual meeting in San Juan Puerto Rico. As usual the conference was an amazing gather of wetland and aquatic scientists from all around the globe discussing the various types and facets of wetland ecology, management and policy. 
