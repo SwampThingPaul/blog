@@ -1,5 +1,5 @@
 ---
-title: "Publication Summary of “Assessment of Upper Taylor Slough...”"
+title: "Publication Summary of Assessment of Upper Taylor Slough..."
 date: "August 20, 2017"
 output: 
   prettydoc::html_pretty:
