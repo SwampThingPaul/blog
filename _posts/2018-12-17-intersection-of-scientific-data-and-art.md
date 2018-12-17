@@ -32,14 +32,14 @@ Google Books Ngram Viewer for the term “data” between 1800 and 2008.
 </blockquote>
 <p>The first TED Talk of the playlist is <a href="http://nathaliemiebach.com/">Nathalie Miebach</a> who transforms data (numbers on a spreadsheet) into complex and elaborate sculptures manifesting the forces of nature and time. In her talk (below) she highlights a sculpture of the interaction of wind speed, temperature and barometric pressure during <a href="https://en.wikipedia.org/wiki/Hurricane_Noel">Hurricane Noel (2007)</a>. This sculpture also is accompanied by a musical score of the data from the <a href="http://nathaliemiebach.com/weatherscores.html">Weather Scores</a> project. At first glance the sculpture is chaotic but true to artistic observation things begin to become apparent, you begin to see patterns emerge and learn to embrace the complexity of the piece. Yes, through this chaos you begin to understand the interaction of environmental variables which ultimately culminate into what we see as a tropical storm or hurricane.</p>
 <center>
-<a href="https://www.youtube.com/watch?v=MbhNaj88uL4" title="Art made of storms - Click to Watch!"><img src="{{ site.url }}{{ site.baseurl }}\_knitr\https:\img.youtube.com\vi\MbhNaj88uL4\0.jpg" alt="Art made of storms" /></a>
+<a href="https://www.youtube.com/watch?v=MbhNaj88uL4" title="Art made of storms - Click to Watch!"><img src="{{ site.url }}{{ site.baseurl }}\images\201812_sciart_post\Meibach.png" alt="Art made of storms" /></a>
 </center>
 <center>
 Art made of storms. | Nathalie Miebach. <em>Click to watch (it it will redirect to YouTube)</em>.
 </center>
 <p>This translation of data to art was also done by translating high-frequency lake data into a moving musical compositions. In <a href="https://case.fiu.edu/about/directory/people/gaisere.html">Dr Evelyn Gaiser’s</a> TED Talk (below) she starts by showing a 3D plot of lake temperature at various depths though time with a standard red-to-blue color scale with distinct patterns. This image is artistic in its own right but Dr Gaiser and her students take it to the next level by fitting a muscial scale to the data and we get to hear the song of <a href="http://www.archbold-station.org/html/research/annie/annie.html">Lake Annie</a>. Being an aquatic ecologist, this piece struck me immediately. So much so I had to reach out to Dr Gaiser and thank her for creativity and sharing this amazing piece of art. This performance has personally put <a href="https://en.wikipedia.org/wiki/Limnology">limnology</a> into a whole different perspective. Dr Gaiser also succinctly stated that “Music seems uniquely suited to expressing the nuances of nature.”</p>
 <center>
-<a href="https://www.youtube.com/watch?v=m7fCmHG3h7k" title="Lakes write music - Click to Watch!"><img src="{{ site.url }}{{ site.baseurl }}\_knitr\https:\img.youtube.com\vi\m7fCmHG3h7k\0.jpg" alt="Lakes write music" /></a>
+<a href="https://www.youtube.com/watch?v=m7fCmHG3h7k" title="Lakes write music - Click to Watch!"><img src="{{ site.url }}{{ site.baseurl }}\images\201812_sciart_post\Gaiser.png" alt="Lakes write music" /></a>
 </center>
 <center>
 Lakes write music. Science is listening. | Evelyn Gaiser. <em>Click to watch (it it will redirect to YouTube)</em>.
@@ -74,6 +74,6 @@ Rowley River in Plum Island Sound, Massachusetts (USA).
 <hr />
 <div id="references-to-artists-and-writers-in-this-blog-is-by-no-means-a-personal-endorsement-of-the-artisits-authors-or-publishers.-reference-neq-endorse." class="section level1">
 <h1><strong><em>References to artists and writers in this blog is by no means a personal endorsement of the artisits, authors or publishers. Reference <span class="math inline">\(\neq\)</span> endorse.</em></strong></h1>
-<p>file complied 2018-12-17 2:53:02 PM EST</p>
+<p>file complied 2018-12-17 3:01:32 PM EST</p>
 </div>
 </section>
