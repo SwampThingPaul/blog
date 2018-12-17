@@ -31,28 +31,18 @@ Google Books Ngram Viewer for the term “data” between 1800 and 2008.
 </p>
 </blockquote>
 <p>The first TED Talk of the playlist is <a href="http://nathaliemiebach.com/">Nathalie Miebach</a> who transforms data (numbers on a spreadsheet) into complex and elaborate sculptures manifesting the forces of nature and time. In her talk (below) she highlights a sculpture of the interaction of wind speed, temperature and barometric pressure during <a href="https://en.wikipedia.org/wiki/Hurricane_Noel">Hurricane Noel (2007)</a>. This sculpture also is accompanied by a musical score of the data from the <a href="http://nathaliemiebach.com/weatherscores.html">Weather Scores</a> project. At first glance the sculpture is chaotic but true to artistic observation things begin to become apparent, you begin to see patterns emerge and learn to embrace the complexity of the piece. Yes, through this chaos you begin to understand the interaction of environmental variables which ultimately culminate into what we see as a tropical storm or hurricane.</p>
-<!---
-<div style="text-align: center">
-<iframe width="560" height="315" src="{{ site.url }}{{ site.baseurl }}\_knitr\https:\www.youtube.com\embed\MbhNaj88uL4" frameborder="0" allow="autoplay; encrypted-media"></iframe>
-</div>
---->
-<div align="center">
-<p><a href="https://www.youtube.com/watch?v=MbhNaj88uL4"><img src="{{ site.url }}{{ site.baseurl }}\_knitr\https:\img.youtube.com\vi\MbhNaj88uL4\0.jpg" alt="IMAGE ALT TEXT"></a></p>
-</div>
 <center>
-Art made of storms. | Nathalie Miebach
+<a href="https://www.youtube.com/watch?v=MbhNaj88uL4" title="Art made of storms - Click to Watch!"><img src="{{ site.url }}{{ site.baseurl }}\_knitr\https:\img.youtube.com\vi\MbhNaj88uL4\0.jpg" alt="Art made of storms" /></a>
+</center>
+<center>
+Art made of storms. | Nathalie Miebach. <em>Click to watch (it it will redirect to YouTube)</em>.
 </center>
 <p>This translation of data to art was also done by translating high-frequency lake data into a moving musical compositions. In <a href="https://case.fiu.edu/about/directory/people/gaisere.html">Dr Evelyn Gaiser’s</a> TED Talk (below) she starts by showing a 3D plot of lake temperature at various depths though time with a standard red-to-blue color scale with distinct patterns. This image is artistic in its own right but Dr Gaiser and her students take it to the next level by fitting a muscial scale to the data and we get to hear the song of <a href="http://www.archbold-station.org/html/research/annie/annie.html">Lake Annie</a>. Being an aquatic ecologist, this piece struck me immediately. So much so I had to reach out to Dr Gaiser and thank her for creativity and sharing this amazing piece of art. This performance has personally put <a href="https://en.wikipedia.org/wiki/Limnology">limnology</a> into a whole different perspective. Dr Gaiser also succinctly stated that “Music seems uniquely suited to expressing the nuances of nature.”</p>
-<!---
-<div style="text-align: center">
-<iframe width="560" height="315" src="{{ site.url }}{{ site.baseurl }}\_knitr\https:\www.youtube.com\embed\m7fCmHG3h7k" frameborder="0" allow="autoplay; encrypted-media"></iframe>
-</div>
---->
-<div align="center">
-<p><a href="https://www.youtube.com/watch?v=m7fCmHG3h7k"><img src="{{ site.url }}{{ site.baseurl }}\_knitr\https:\img.youtube.com\vi\m7fCmHG3h7k\0.jpg" alt="IMAGE ALT TEXT"></a></p>
-</div>
 <center>
-Lakes write music. Science is listening. | Evelyn Gaiser
+<a href="https://www.youtube.com/watch?v=m7fCmHG3h7k" title="Lakes write music - Click to Watch!"><img src="{{ site.url }}{{ site.baseurl }}\_knitr\https:\img.youtube.com\vi\m7fCmHG3h7k\0.jpg" alt="Lakes write music" /></a>
+</center>
+<center>
+Lakes write music. Science is listening. | Evelyn Gaiser. <em>Click to watch (it it will redirect to YouTube)</em>.
 </center>
 <p>“Science art” is not isolated to just sculpture or music, but recently the idea of fusing fashion and art is taking hold. The collaboration between fashion and science is a way to provide a new language for public outreach and science as well as inspiring the Fashion world. The melding of fashion and science goes from elaborate cat walk designs to interesting clothing patterns as is the case for <a href="https://www.cafepress.com/+diatom+scarves">diatoms on scarfs</a> and other clothing patterns. This movement has even resulted in the birth of a new creative field called <a href="http://www.thefashionglobe.com/descience">Descience</a>, short for design science.</p>
 <p>Much like traditional art, “Science art” can vary in size and scope. Some of the most notable and maybe more frequently overlooked is public art displays. Using large public art displays, artist <a href="http://cortada.com">Xavier Cortada</a> brings our relationship to place, each other and the natural work front and center with large fountains, murals and sculptures to symbolize important species, concepts or phenomenon.</p>
