@@ -74,5 +74,6 @@ Rowley River in Plum Island Sound, Massachusetts (USA).
 <hr />
 <div id="references-to-artists-and-writers-in-this-blog-is-by-no-means-a-personal-endorsement-of-the-artisits-authors-or-publishers.-reference-neq-endorse." class="section level1">
 <h1><strong><em>References to artists and writers in this blog is by no means a personal endorsement of the artisits, authors or publishers. Reference <span class="math inline">\(\neq\)</span> endorse.</em></strong></h1>
+<p>file complied 2018-12-17 2:53:02 PM EST</p>
 </div>
 </section>

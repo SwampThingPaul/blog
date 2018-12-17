@@ -3,7 +3,6 @@ title: "Intersection of Scientific Data and Art"
 date: "December 17, 2018"
 output: 
   prettydoc::html_pretty:
-  theme: cayman
 highlight: github
 ---
 
@@ -95,3 +94,5 @@ In this age of "**Big Data**" more people, scientist and non-scientists alike ar
 ***
 
 # ***References to artists and writers in this blog is by no means a personal endorsement of the artisits, authors or publishers. Reference $\neq$ endorse.***
+
+file complied `r format(Sys.time(),"%F %X %Z")`
