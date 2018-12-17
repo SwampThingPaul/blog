@@ -75,7 +75,7 @@ Okaloacoochee Slough State Forest, Florida (USA).
 <center>
 Whitewater Bay in Everglades National Park, Florida (USA).
 </center>
-<p><br> <br></p>
+<p><br></p>
 <img src="{{ site.url }}{{ site.baseurl }}\images\201812_sciart_post\PlumIsland.png" width="75%" style="display: block; margin: auto;" />
 <center>
 Rowley River in Plum Island Sound, Massachusetts (USA).

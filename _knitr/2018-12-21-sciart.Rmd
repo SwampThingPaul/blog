@@ -95,7 +95,6 @@ knitr::include_graphics("../images/201812_sciart_post/FCE_Whitewater.png")
 ```
 <center> Whitewater Bay in Everglades National Park, Florida (USA).</center>
 <br>
-<br>
 
 ```{r 3, out.width="75%",echo=FALSE,fig.align="center"}
 knitr::include_graphics("../images/201812_sciart_post/PlumIsland.png")
