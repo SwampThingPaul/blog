@@ -7,7 +7,6 @@ layout: default
   
   <div class="date">
     Written on {{ page.date | date: "%B %e, %Y" }}
-    {% include share.html %}
   </div>
   
   <hr>
@@ -16,6 +15,7 @@ layout: default
 
   <div class="entry">
     {{ content }}
+    {% include share.html %}
   </div>
 
   {% include disqus.html %}
