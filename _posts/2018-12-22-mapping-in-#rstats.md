@@ -49,13 +49,16 @@ library(plyr)</code></pre>
 <pre><code>bbox=raster::extent(473714,587635,2748300,2960854);#Bounding box for our Area of Interest (AOI)
 base.map=tm_shape(shore,bbox=bbox)+tm_polygons(col=cols[1])+
   tm_shape(eaa)+tm_fill(&quot;olivedrab1&quot;)+tm_borders(&quot;grey&quot;,lwd=1.5,lty=1.75)+
-  tm_shape(spsample(eaa,&quot;random&quot;,n=500,pretty=F))+tm_dots(col=&quot;grey80&quot;,size=0.005)+
+  tm_shape(spsample(eaa,&quot;random&quot;,n=500,pretty=F))+
+  tm_dots(col=&quot;grey80&quot;,size=0.005)+
   tm_shape(c139)+tm_fill(&quot;grey&quot;)+
   tm_shape(sta)+tm_polygons(&quot;skyblue&quot;)+
   tm_shape(rs.feat)+tm_polygons(&quot;steelblue3&quot;)+
   tm_shape(rs.feat.hatch)+tm_lines(col=&quot;grey&quot;)+
   tm_shape(wma)+tm_borders(&quot;grey50&quot;,lwd=1.5,lty=2)+tm_fill(cols[3])+
-  tm_shape(wma.hatch)+tm_lines(col=cols[5],lwd=2)+tm_shape(wma)+tm_borders(&quot;grey50&quot;,lwd=2,lty=1)+
+  tm_shape(wma.hatch)+
+  tm_lines(col=cols[5],lwd=2)+tm_shape(wma)+
+  tm_borders(&quot;grey50&quot;,lwd=2,lty=1)+
   tm_shape(wca)+tm_fill(&quot;white&quot;)+
   tm_shape(bcnp)+tm_fill(cols[4])+
   tm_shape(enp.shore)+tm_fill(&quot;white&quot;)+tm_borders(&quot;dodgerblue3&quot;,lwd=1)+
@@ -100,13 +103,15 @@ print(region.map,vp=viewport(0.82,0.29,0.3,0.60,just=&quot;right&quot;))</code><
 <pre><code>tmap_save(map2,&quot;example.png&quot;,width = 6.5,height=7,units=&quot;in&quot;,dpi=200,
   insets_tm=region.map,insets_vp =viewport(0.94,0.21,0.3,0.60,just=&quot;right&quot;) )</code></pre>
 <hr />
-<p>Happy Mapping</p>
+<center>
+Happy Mapping
+</center>
 <div class="figure" style="text-align: center">
 <img src="{{ site.url }}{{ site.baseurl }}\images\20181222_rstatmap\gis-header-s.jpg" alt="image from [source](https://fra.me/gis)" width="25%" />
 <p class="caption">
 image from <a href="https://fra.me/gis">source</a>
 </p>
 </div>
-<hr />
+<p><br></p>
 </div>
 </section>

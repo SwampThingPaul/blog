@@ -72,13 +72,16 @@ So far after endless hours of searching I found the `tmap` library, so far the e
 bbox=raster::extent(473714,587635,2748300,2960854);#Bounding box for our Area of Interest (AOI)
 base.map=tm_shape(shore,bbox=bbox)+tm_polygons(col=cols[1])+
   tm_shape(eaa)+tm_fill("olivedrab1")+tm_borders("grey",lwd=1.5,lty=1.75)+
-  tm_shape(spsample(eaa,"random",n=500,pretty=F))+tm_dots(col="grey80",size=0.005)+
+  tm_shape(spsample(eaa,"random",n=500,pretty=F))+
+  tm_dots(col="grey80",size=0.005)+
   tm_shape(c139)+tm_fill("grey")+
   tm_shape(sta)+tm_polygons("skyblue")+
   tm_shape(rs.feat)+tm_polygons("steelblue3")+
   tm_shape(rs.feat.hatch)+tm_lines(col="grey")+
   tm_shape(wma)+tm_borders("grey50",lwd=1.5,lty=2)+tm_fill(cols[3])+
-  tm_shape(wma.hatch)+tm_lines(col=cols[5],lwd=2)+tm_shape(wma)+tm_borders("grey50",lwd=2,lty=1)+
+  tm_shape(wma.hatch)+
+  tm_lines(col=cols[5],lwd=2)+tm_shape(wma)+
+  tm_borders("grey50",lwd=2,lty=1)+
   tm_shape(wca)+tm_fill("white")+
   tm_shape(bcnp)+tm_fill(cols[4])+
   tm_shape(enp.shore)+tm_fill("white")+tm_borders("dodgerblue3",lwd=1)+
@@ -148,10 +151,10 @@ tmap_save(map2,"example.png",width = 6.5,height=7,units="in",dpi=200,
 ```
 ***
 
-Happy Mapping
+<center>Happy Mapping</center>
 
 ```{r 3, out.width="25%",echo=FALSE,fig.align="center",fig.cap="image from [source](https://fra.me/gis)"}
 knitr::include_graphics("../images/20181222_rstatmap/gis-header-s.jpg")
 ```
 
-***
+<br>
