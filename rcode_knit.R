@@ -18,4 +18,7 @@
 #prettyjekyll::FormatPost("_knitr/2018-12-21-sciart.Rmd")
 #file.remove("_knitr/2018-12-21-sciart.html")
 
+#prettyjekyll::FormatPost("_knitr/2018-12-22-rstat_map.Rmd")
+#file.remove("_knitr/2018-12-22-rstat_map.html")
+
 #file.create("_knitr/test.Rmd")

@@ -1,6 +1,5 @@
 ---
 title: "Mapping in #rstats"
-author: "Paul Julian"
 date: "December 22, 2018"
 output: 
   prettydoc::html_pretty:
