@@ -373,30 +373,13 @@ $(document).ready(function () {
 </div>
 
 
+<div id="blog-posts" class="section level2">
+<h2>Blog Posts</h2>
+<p>{% for post in site.posts %} * {{ post.date | date_to_string }} » <a href="%7B%7B%20post.url%20%7D%7D">{{ post.title }}</a> {% endfor %}</p>
 <!--
-## Blog Posts
-
-{% for post in site.posts %}
-  * {{ post.date | date_to_string }} &raquo; [ {{ post.title }} ]({{ post.url }})
-{% endfor %}
 http://joshualande.com/jekyll-github-pages-poole
 -->
-<!-- from http://chris.house/blog/building-a-simple-archive-page-with-jekyll/
--->
-<section class="archive-post-list">
-{% for post in site.posts %} {% assign currentDate = post.date | date: “%Y” %} {% if currentDate != myDate %} {% unless forloop.first %}
-</ul>
-{% endunless %}
-<h1>
-{{ currentDate }}
-</h1>
-<pre><code>       &lt;ul&gt;
-       {% assign myDate = currentDate %}
-   {% endif %}
-   &lt;li&gt;&lt;a href=&quot;{{ post.url }}&quot;&gt;&lt;span&gt;{{ post.date | date: &quot;%B %-d, %Y&quot; }}&lt;/span&gt; - {{ post.title }}&lt;/a&gt;&lt;/li&gt;
-   {% if forloop.last %}&lt;/ul&gt;{% endif %}</code></pre>
-<p>{% endfor %}</p>
-</section>
+</div>
 
 
 
