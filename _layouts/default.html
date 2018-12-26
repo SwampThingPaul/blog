@@ -36,6 +36,15 @@
       </div>
     </div>
 
+<h3 class="masthead-title">
+<a href="/" title="Home">{{ site.title }}</a>
+
+{% for page in site.pages_list %}
+  &nbsp;&nbsp;&nbsp;
+  <small><a href="{{ page[1]  }}">{{ page[0] }}</a></small>
+{% endfor %}
+</h3>
+
     <div id="main" role="main" class="container">
       {{ content }}
     </div>
@@ -51,13 +60,5 @@
     {% include analytics.html %}
   </body>
 
-<h3 class="masthead-title">
-<a href="/" title="Home">{{ site.title }}</a>
-
-{% for page in site.pages_list %}
-  &nbsp;&nbsp;&nbsp;
-  <small><a href="{{ page[1]  }}">{{ page[0] }}</a></small>
-{% endfor %}
-</h3>
 
 </html>
