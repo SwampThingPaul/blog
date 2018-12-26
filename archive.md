@@ -3,6 +3,7 @@ layout: page
 title: Archive
 ---
 
+Archive of posts from {{ page.date | date: "%Y" }}
 
 {% for post in site.posts %}
   * {{ post.date | date_to_string }} &raquo; [ {{ post.title }} ]({{ post.url }})
