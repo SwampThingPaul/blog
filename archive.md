@@ -3,15 +3,15 @@ layout: page
 title: Archive
 ---
 
-<!--
+
 {% for post in site.posts %}
   * {{ post.date | date_to_string }} &raquo; [ {{ post.title }} ]({{ post.url }})
 {% endfor %}
 
-
+<!--
 http://joshualande.com/jekyll-github-pages-poole
 -->
-
+<!--
 <h1>Archive of posts from {{ page.date | date: "%Y" }}</h1>
 
 <ul class="posts">
@@ -22,3 +22,4 @@ http://joshualande.com/jekyll-github-pages-poole
   </li>
 {% endfor %}
 </ul>
+--->
