@@ -6,7 +6,6 @@ date: "December 22, 2018"
 layout: post
 ---
 
-<script src="{{ site.url }}{{ site.baseurl }}\_knitr\https:\gist.github.com\SwampThingPaul\c272a1556f5104da5cdd9e51c8b4bca9.js"></script>
 
 <section class="main-content">
 <p><strong>Keywords:</strong> tmap, rstats, R, GIS</p>
@@ -47,30 +46,28 @@ library(plyr)</code></pre>
 <p>Since the original post/development of the GitHub repo another workaround has been developed <a href="https://github.com/mtennekes/tmap/issues/49#issuecomment-448692646" target="_blank">link</a>. <strong>Caveat:</strong> I have not tried this alternative workaround.</p>
 <hr />
 <p>So far after endless hours of searching I found the <code>tmap</code> library, so far the easiest I have explored for producing reproducible maps in the R-environment beyond the base package (which is equally a viable option as well). After importing and adjusting data as needed a basemap can be put together very easily using the <code>tmap</code> functionality. After setting your bounding box or “Area of Interest” you are off to the races specifying where the layers sit (like in ArcGIS), what color, line type, point type, etc. Below is from the r-script (<a href="https://github.com/SwampThingPaul/rstat_mapping/blob/6cb5b478149678830c7e9d5e09de66918623ce94/X_rstat_map.R" target="_blank">link</a>), some layers are called twice for effect.</p>
-<script src="{{ site.url }}{{ site.baseurl }}\_knitr\https:\gist.github.com\SwampThingPaul\c272a1556f5104da5cdd9e51c8b4bca9.js"></script>
-<!--
-```
-bbox=raster::extent(473714,587635,2748300,2960854);#Bounding box for our Area of Interest (AOI)
+<pre><code>bbox=raster::extent(473714,587635,2748300,2960854);#Bounding box for our Area of Interest (AOI)
 base.map=tm_shape(shore,bbox=bbox)+tm_polygons(col=cols[1])+
-  tm_shape(eaa)+tm_fill("olivedrab1")+tm_borders("grey",lwd=1.5,lty=1.75)+
-  tm_shape(spsample(eaa,"random",n=500,pretty=F))+
-  tm_dots(col="grey80",size=0.005)+
-  tm_shape(c139)+tm_fill("grey")+
-  tm_shape(sta)+tm_polygons("skyblue")+
-  tm_shape(rs.feat)+tm_polygons("steelblue3")+
-  tm_shape(rs.feat.hatch)+tm_lines(col="grey")+
-  tm_shape(wma)+tm_borders("grey50",lwd=1.5,lty=2)+tm_fill(cols[3])+
+  tm_shape(eaa)+tm_fill(&quot;olivedrab1&quot;)+tm_borders(&quot;grey&quot;,lwd=1.5,lty=1.75)+
+  tm_shape(spsample(eaa,&quot;random&quot;,n=500,pretty=F))+
+  tm_dots(col=&quot;grey80&quot;,size=0.005)+
+  tm_shape(c139)+tm_fill(&quot;grey&quot;)+
+  tm_shape(sta)+tm_polygons(&quot;skyblue&quot;)+
+  tm_shape(rs.feat)+tm_polygons(&quot;steelblue3&quot;)+
+  tm_shape(rs.feat.hatch)+tm_lines(col=&quot;grey&quot;)+
+  tm_shape(wma)+tm_borders(&quot;grey50&quot;,lwd=1.5,lty=2)+tm_fill(cols[3])+
   tm_shape(wma.hatch)+
   tm_lines(col=cols[5],lwd=2)+tm_shape(wma)+
-  tm_borders("grey50",lwd=2,lty=1)+
-  tm_shape(wca)+tm_fill("white")+
+  tm_borders(&quot;grey50&quot;,lwd=2,lty=1)+
+  tm_shape(wca)+tm_fill(&quot;white&quot;)+
   tm_shape(bcnp)+tm_fill(cols[4])+
-  tm_shape(enp.shore)+tm_fill("white")+tm_borders("dodgerblue3",lwd=1)+
-  tm_shape(canal)+tm_lines("dodgerblue3",lwd=2)+
+  tm_shape(enp.shore)+tm_fill(&quot;white&quot;)+tm_borders(&quot;dodgerblue3&quot;,lwd=1)+
+  tm_shape(canal)+tm_lines(&quot;dodgerblue3&quot;,lwd=2)+
   tm_shape(canal)+tm_lines(cols[2],lwd=1)+
-  tm_shape(evpa)+tm_borders(col="red",lwd=1.5);
-```
--->
+  tm_shape(evpa)+tm_borders(col=&quot;red&quot;,lwd=1.5);</code></pre>
+<center>
+Raw code can be downloaded <a href="https://gist.githubusercontent.com/SwampThingPaul/c272a1556f5104da5cdd9e51c8b4bca9/raw/302e2a66affa2ef9451707161e922453ef04dd1f/basemap.r" target="_blank">here</a>
+</center>
 <p>Once the base map is put together to your liking, then you can layer on points, rasters, etc. very simply.</p>
 <pre><code>base.map+tm_shape(TN.GM)+tm_symbol();</code></pre>
 <p>Use the <code>png() ... dev.off()</code> function to write the plot to a file or use the <code>tmap_save()</code> function.</p>

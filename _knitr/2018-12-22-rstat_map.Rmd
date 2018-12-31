@@ -67,9 +67,6 @@ Since the original post/development of the GitHub repo another workaround has be
 So far after endless hours of searching I found the `tmap` library, so far the easiest I have explored for producing reproducible maps in the R-environment beyond the base package (which is equally a viable option as well). After importing and adjusting data as needed a basemap can be put together very easily using the `tmap` functionality. After setting your bounding box or "Area of Interest" you are off to the races specifying where the layers sit (like in ArcGIS), what color, line type, point type, etc. Below is from the r-script ([link](https://github.com/SwampThingPaul/rstat_mapping/blob/6cb5b478149678830c7e9d5e09de66918623ce94/X_rstat_map.R){target="_blank"}), some layers are called twice for effect. 
 
 
-<script src="https://gist.github.com/SwampThingPaul/c272a1556f5104da5cdd9e51c8b4bca9.js"></script>
-
-<!--
 ```
 bbox=raster::extent(473714,587635,2748300,2960854);#Bounding box for our Area of Interest (AOI)
 base.map=tm_shape(shore,bbox=bbox)+tm_polygons(col=cols[1])+
@@ -91,7 +88,8 @@ base.map=tm_shape(shore,bbox=bbox)+tm_polygons(col=cols[1])+
   tm_shape(canal)+tm_lines(cols[2],lwd=1)+
   tm_shape(evpa)+tm_borders(col="red",lwd=1.5);
 ```
--->
+<center>Raw code can be downloaded [here](https://gist.githubusercontent.com/SwampThingPaul/c272a1556f5104da5cdd9e51c8b4bca9/raw/302e2a66affa2ef9451707161e922453ef04dd1f/basemap.r){target="_blank"}</center>
+
 Once the base map is put together to your liking, then you can layer on points, rasters, etc. very simply. 
 
 ```
