@@ -46,6 +46,7 @@ library(HatchedPolygons)
 
 library(plyr)
 ```
+<center>Raw code can be downloaded [here](https://gist.githubusercontent.com/SwampThingPaul/1edf626a6a4588df62c011f2e98769f4/raw/639259006875b622f4fe9b6d2eb92ccc28de748f/rstats_mapping_libraries.r){target="_blank"}.</center>
 
 Unfortunatly at this time, the `tmap` library does not have a pattern filled option for polygons as discussed [here](https://github.com/mtennekes/tmap/issues/49){target="_blank"}. Therefore a workaround is needed, leveraging the functions in the `HatchedPolygons` library, I developed a custom helper function to make a patterned fill. The motivation of the custom function is that the `hatched.SpatialPolygons()` function does not produce a spatial data frame with a projection, therefore I added the `proj4string()` function into the custom function.  
 
@@ -57,6 +58,7 @@ hatched.SP=function(x,density=0.001,angle=45,fillOddEven = FALSE){
   return(tmp)
 }
 ```
+<center>Raw code can be downloaded [here](https://gist.githubusercontent.com/SwampThingPaul/1edf626a6a4588df62c011f2e98769f4/raw/639259006875b622f4fe9b6d2eb92ccc28de748f/hatched_polygon.r){target="_blank"}.</center>
 
 ****
 
@@ -88,7 +90,7 @@ base.map=tm_shape(shore,bbox=bbox)+tm_polygons(col=cols[1])+
   tm_shape(canal)+tm_lines(cols[2],lwd=1)+
   tm_shape(evpa)+tm_borders(col="red",lwd=1.5);
 ```
-<center>Raw code can be downloaded [here](https://gist.githubusercontent.com/SwampThingPaul/c272a1556f5104da5cdd9e51c8b4bca9/raw/302e2a66affa2ef9451707161e922453ef04dd1f/basemap.r){target="_blank"}</center>
+<center>Raw code can be downloaded [here](https://gist.githubusercontent.com/SwampThingPaul/c272a1556f5104da5cdd9e51c8b4bca9/raw/302e2a66affa2ef9451707161e922453ef04dd1f/basemap.r){target="_blank"}.</center>
 
 Once the base map is put together to your liking, then you can layer on points, rasters, etc. very simply. 
 

@@ -35,6 +35,9 @@ library(sf)
 library(HatchedPolygons)
 
 library(plyr)</code></pre>
+<center>
+Raw code can be downloaded <a href="https://gist.githubusercontent.com/SwampThingPaul/1edf626a6a4588df62c011f2e98769f4/raw/639259006875b622f4fe9b6d2eb92ccc28de748f/rstats_mapping_libraries.r" target="_blank">here</a>.
+</center>
 <p>Unfortunatly at this time, the <code>tmap</code> library does not have a pattern filled option for polygons as discussed <a href="https://github.com/mtennekes/tmap/issues/49" target="_blank">here</a>. Therefore a workaround is needed, leveraging the functions in the <code>HatchedPolygons</code> library, I developed a custom helper function to make a patterned fill. The motivation of the custom function is that the <code>hatched.SpatialPolygons()</code> function does not produce a spatial data frame with a projection, therefore I added the <code>proj4string()</code> function into the custom function.</p>
 <pre><code>hatched.SP=function(x,density=0.001,angle=45,fillOddEven = FALSE){
   require(HatchedPolygons)
@@ -42,6 +45,9 @@ library(plyr)</code></pre>
   proj4string(tmp)=proj4string(x)
   return(tmp)
 }</code></pre>
+<center>
+Raw code can be downloaded <a href="https://gist.githubusercontent.com/SwampThingPaul/1edf626a6a4588df62c011f2e98769f4/raw/639259006875b622f4fe9b6d2eb92ccc28de748f/hatched_polygon.r" target="_blank">here</a>.
+</center>
 <hr />
 <p>Since the original post/development of the GitHub repo another workaround has been developed <a href="https://github.com/mtennekes/tmap/issues/49#issuecomment-448692646" target="_blank">link</a>. <strong>Caveat:</strong> I have not tried this alternative workaround.</p>
 <hr />
@@ -66,7 +72,7 @@ base.map=tm_shape(shore,bbox=bbox)+tm_polygons(col=cols[1])+
   tm_shape(canal)+tm_lines(cols[2],lwd=1)+
   tm_shape(evpa)+tm_borders(col=&quot;red&quot;,lwd=1.5);</code></pre>
 <center>
-Raw code can be downloaded <a href="https://gist.githubusercontent.com/SwampThingPaul/c272a1556f5104da5cdd9e51c8b4bca9/raw/302e2a66affa2ef9451707161e922453ef04dd1f/basemap.r" target="_blank">here</a>
+Raw code can be downloaded <a href="https://gist.githubusercontent.com/SwampThingPaul/c272a1556f5104da5cdd9e51c8b4bca9/raw/302e2a66affa2ef9451707161e922453ef04dd1f/basemap.r" target="_blank">here</a>.
 </center>
 <p>Once the base map is put together to your liking, then you can layer on points, rasters, etc. very simply.</p>
 <pre><code>base.map+tm_shape(TN.GM)+tm_symbol();</code></pre>
