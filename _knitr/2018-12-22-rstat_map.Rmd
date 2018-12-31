@@ -11,7 +11,7 @@ __Keywords:__ tmap, rstats, R, GIS
 
 ***
 
-This post was originally hosted on at my  [rstat_mapping](https://github.com/SwampThingPaul/rstat_mapping) GitHub repository. Where an example geodatabase with geospatial data, summary statistis (i.e. site specific annual mean total nitrogen concentration) and associated #rstats code is housed. 
+This post was originally hosted on at my  [rstat_mapping](https://github.com/SwampThingPaul/rstat_mapping){target="_blank"} GitHub repository. Where an example geodatabase with geospatial data, summary statistis (i.e. site specific annual mean total nitrogen concentration) and associated #rstats code is housed. 
 
 _This post is slightly edited from the original post in the GitHub repo_
 
@@ -21,7 +21,7 @@ _This post is slightly edited from the original post in the GitHub repo_
 
 To date mapping in R has been very limited and frustrating. As many people have noted that R is not a mapping software. Its not really a geospatial analysis software however with the develope of more and more packages and the evolution of R it is quickly becoming a tool to conduct geospatial statistics and analysis. Regardless the first step in GIS is typically to produce a map.
 
-[This repository](https://github.com/SwampThingPaul/rstat_mapping) houses a geospatial database (.gdb) assembled in ArcGIS, several comma-seperated files (.csv) and a basic R script developed for this repositiory to develop the map below.
+[This repository](https://github.com/SwampThingPaul/rstat_mapping){target="_blank"} houses a geospatial database (.gdb) assembled in ArcGIS, several comma-seperated files (.csv) and a basic R script developed for this repositiory to develop the map below.
 
 ```{r 1, out.width="75%",echo=FALSE,fig.align="center"}
 knitr::include_graphics("../images/20181222_rstatmap/example_map.png")
@@ -29,7 +29,7 @@ knitr::include_graphics("../images/20181222_rstatmap/example_map.png")
 <center> Map of annual mean total nitrogen concentrations from sites within the Everglades Protection Area (Southern Florida).</center>
 
 
-The R-script utilizes several packages including `library(tmap)` [github page](https://github.com/mtennekes/tmap) and `library(HatchedPolygons)` [github page](https://github.com/statnmap/HatchedPolygons). 
+The R-script utilizes several packages including `library(tmap)` [github page](https://github.com/mtennekes/tmap){target="_blank"} and `library(HatchedPolygons)` [github page](https://github.com/statnmap/HatchedPolygons){target="_blank"}. 
 
 Here is a list of libraries called for this effort (some may not be used).
 ```
@@ -47,7 +47,7 @@ library(HatchedPolygons)
 library(plyr)
 ```
 
-Unfortunatly at this time, the `tmap` library does not have a pattern filled option for polygons as discussed [here](https://github.com/mtennekes/tmap/issues/49). Therefore a workaround is needed, leveraging the functions in the `HatchedPolygons` library, I developed a custom helper function to make a patterned fill. The motivation of the custom function is that the `hatched.SpatialPolygons()` function does not produce a spatial data frame with a projection, therefore I added the `proj4string()` function into the custom function.  
+Unfortunatly at this time, the `tmap` library does not have a pattern filled option for polygons as discussed [here](https://github.com/mtennekes/tmap/issues/49){target="_blank"}. Therefore a workaround is needed, leveraging the functions in the `HatchedPolygons` library, I developed a custom helper function to make a patterned fill. The motivation of the custom function is that the `hatched.SpatialPolygons()` function does not produce a spatial data frame with a projection, therefore I added the `proj4string()` function into the custom function.  
 
 ```
 hatched.SP=function(x,density=0.001,angle=45,fillOddEven = FALSE){
@@ -60,13 +60,16 @@ hatched.SP=function(x,density=0.001,angle=45,fillOddEven = FALSE){
 
 ****
 
-Since the original post/development of the GitHub repo another workaround has been developed [link](https://github.com/mtennekes/tmap/issues/49#issuecomment-448692646). __Caveat:__ I have not tried this alternative workaround.
+Since the original post/development of the GitHub repo another workaround has been developed [link](https://github.com/mtennekes/tmap/issues/49#issuecomment-448692646){target="_blank"}. __Caveat:__ I have not tried this alternative workaround.
 
 ****
 
-So far after endless hours of searching I found the `tmap` library, so far the easiest I have explored for producing reproducible maps in the R-environment beyond the base package (which is equally a viable option as well). After importing and adjusting data as needed a basemap can be put together very easily using the `tmap` functionality. After setting your bounding box or "Area of Interest" you are off to the races specifying where the layers sit (like in ArcGIS), what color, line type, point type, etc. Below is from the r-script ([link](https://github.com/SwampThingPaul/rstat_mapping/blob/6cb5b478149678830c7e9d5e09de66918623ce94/X_rstat_map.R)), some layers are called twice for effect. 
+So far after endless hours of searching I found the `tmap` library, so far the easiest I have explored for producing reproducible maps in the R-environment beyond the base package (which is equally a viable option as well). After importing and adjusting data as needed a basemap can be put together very easily using the `tmap` functionality. After setting your bounding box or "Area of Interest" you are off to the races specifying where the layers sit (like in ArcGIS), what color, line type, point type, etc. Below is from the r-script ([link](https://github.com/SwampThingPaul/rstat_mapping/blob/6cb5b478149678830c7e9d5e09de66918623ce94/X_rstat_map.R){target="_blank"}), some layers are called twice for effect. 
 
 
+<script src="https://gist.github.com/SwampThingPaul/c272a1556f5104da5cdd9e51c8b4bca9.js"></script>
+
+<!--
 ```
 bbox=raster::extent(473714,587635,2748300,2960854);#Bounding box for our Area of Interest (AOI)
 base.map=tm_shape(shore,bbox=bbox)+tm_polygons(col=cols[1])+
@@ -88,7 +91,7 @@ base.map=tm_shape(shore,bbox=bbox)+tm_polygons(col=cols[1])+
   tm_shape(canal)+tm_lines(cols[2],lwd=1)+
   tm_shape(evpa)+tm_borders(col="red",lwd=1.5);
 ```
-
+-->
 Once the base map is put together to your liking, then you can layer on points, rasters, etc. very simply. 
 
 ```
@@ -103,7 +106,7 @@ A complete script has been posted in this repository for your convience named [X
 
 Adding an inset or regional map is sometime the go-to thing, expecially for ecological studies. This helps put the study in a regional or national context and orient people to your study area. 
 
-Using the exsisting [code](https://github.com/SwampThingPaul/rstat_mapping/blob/f64c19d9c00d66986d969b4c7d2e02c9c88407fe/X_rstat_map.R) and data posted in this repository in conjunction with `Viewport()` in the `library(grid)` or `tmap_save()`.
+Using the exsisting [code](https://github.com/SwampThingPaul/rstat_mapping/blob/f64c19d9c00d66986d969b4c7d2e02c9c88407fe/X_rstat_map.R){target="_blank"} and data posted in this repository in conjunction with `Viewport()` in the `library(grid)` or `tmap_save()`.
 
 ```{r 2, out.width="75%",echo=FALSE,fig.align="center"}
 knitr::include_graphics("../images/20181222_rstatmap/map_inset.png")

@@ -1,27 +1,28 @@
 ---
 title: "Mapping in #rstats"
 
-author: "Paul Julian"
+
 date: "December 22, 2018"
 layout: post
 ---
 
+<script src="{{ site.url }}{{ site.baseurl }}\_knitr\https:\gist.github.com\SwampThingPaul\c272a1556f5104da5cdd9e51c8b4bca9.js"></script>
 
 <section class="main-content">
 <p><strong>Keywords:</strong> tmap, rstats, R, GIS</p>
 <hr />
-<p>This post was originally hosted on at my <a href="https://github.com/SwampThingPaul/rstat_mapping">rstat_mapping</a> GitHub repository. Where an example geodatabase with geospatial data, summary statistis (i.e. site specific annual mean total nitrogen concentration) and associated #rstats code is housed.</p>
+<p>This post was originally hosted on at my <a href="https://github.com/SwampThingPaul/rstat_mapping" target="_blank">rstat_mapping</a> GitHub repository. Where an example geodatabase with geospatial data, summary statistis (i.e. site specific annual mean total nitrogen concentration) and associated #rstats code is housed.</p>
 <p><em>This post is slightly edited from the original post in the GitHub repo</em></p>
 <hr />
 <div id="basic-mapping-in-r" class="section level1">
 <h1>Basic Mapping In R</h1>
 <p>To date mapping in R has been very limited and frustrating. As many people have noted that R is not a mapping software. Its not really a geospatial analysis software however with the develope of more and more packages and the evolution of R it is quickly becoming a tool to conduct geospatial statistics and analysis. Regardless the first step in GIS is typically to produce a map.</p>
-<p><a href="https://github.com/SwampThingPaul/rstat_mapping">This repository</a> houses a geospatial database (.gdb) assembled in ArcGIS, several comma-seperated files (.csv) and a basic R script developed for this repositiory to develop the map below.</p>
+<p><a href="https://github.com/SwampThingPaul/rstat_mapping" target="_blank">This repository</a> houses a geospatial database (.gdb) assembled in ArcGIS, several comma-seperated files (.csv) and a basic R script developed for this repositiory to develop the map below.</p>
 <img src="{{ site.url }}{{ site.baseurl }}\images\20181222_rstatmap\example_map.png" width="75%" style="display: block; margin: auto;" />
 <center>
 Map of annual mean total nitrogen concentrations from sites within the Everglades Protection Area (Southern Florida).
 </center>
-<p>The R-script utilizes several packages including <code>library(tmap)</code> <a href="https://github.com/mtennekes/tmap">github page</a> and <code>library(HatchedPolygons)</code> <a href="https://github.com/statnmap/HatchedPolygons">github page</a>.</p>
+<p>The R-script utilizes several packages including <code>library(tmap)</code> <a href="https://github.com/mtennekes/tmap" target="_blank">github page</a> and <code>library(HatchedPolygons)</code> <a href="https://github.com/statnmap/HatchedPolygons" target="_blank">github page</a>.</p>
 <p>Here is a list of libraries called for this effort (some may not be used).</p>
 <pre><code>library(maptools)
 library(classInt)
@@ -35,7 +36,7 @@ library(sf)
 library(HatchedPolygons)
 
 library(plyr)</code></pre>
-<p>Unfortunatly at this time, the <code>tmap</code> library does not have a pattern filled option for polygons as discussed <a href="https://github.com/mtennekes/tmap/issues/49">here</a>. Therefore a workaround is needed, leveraging the functions in the <code>HatchedPolygons</code> library, I developed a custom helper function to make a patterned fill. The motivation of the custom function is that the <code>hatched.SpatialPolygons()</code> function does not produce a spatial data frame with a projection, therefore I added the <code>proj4string()</code> function into the custom function.</p>
+<p>Unfortunatly at this time, the <code>tmap</code> library does not have a pattern filled option for polygons as discussed <a href="https://github.com/mtennekes/tmap/issues/49" target="_blank">here</a>. Therefore a workaround is needed, leveraging the functions in the <code>HatchedPolygons</code> library, I developed a custom helper function to make a patterned fill. The motivation of the custom function is that the <code>hatched.SpatialPolygons()</code> function does not produce a spatial data frame with a projection, therefore I added the <code>proj4string()</code> function into the custom function.</p>
 <pre><code>hatched.SP=function(x,density=0.001,angle=45,fillOddEven = FALSE){
   require(HatchedPolygons)
   tmp=hatched.SpatialPolygons(x,density=density,angle=angle,fillOddEven = fillOddEven)
@@ -43,28 +44,33 @@ library(plyr)</code></pre>
   return(tmp)
 }</code></pre>
 <hr />
-<p>Since the original post/development of the GitHub repo another workaround has been developed <a href="https://github.com/mtennekes/tmap/issues/49#issuecomment-448692646">link</a>. <strong>Caveat:</strong> I have not tried this alternative workaround.</p>
+<p>Since the original post/development of the GitHub repo another workaround has been developed <a href="https://github.com/mtennekes/tmap/issues/49#issuecomment-448692646" target="_blank">link</a>. <strong>Caveat:</strong> I have not tried this alternative workaround.</p>
 <hr />
-<p>So far after endless hours of searching I found the <code>tmap</code> library, so far the easiest I have explored for producing reproducible maps in the R-environment beyond the base package (which is equally a viable option as well). After importing and adjusting data as needed a basemap can be put together very easily using the <code>tmap</code> functionality. After setting your bounding box or “Area of Interest” you are off to the races specifying where the layers sit (like in ArcGIS), what color, line type, point type, etc. Below is from the r-script (<a href="https://github.com/SwampThingPaul/rstat_mapping/blob/6cb5b478149678830c7e9d5e09de66918623ce94/X_rstat_map.R">link</a>), some layers are called twice for effect.</p>
-<pre><code>bbox=raster::extent(473714,587635,2748300,2960854);#Bounding box for our Area of Interest (AOI)
+<p>So far after endless hours of searching I found the <code>tmap</code> library, so far the easiest I have explored for producing reproducible maps in the R-environment beyond the base package (which is equally a viable option as well). After importing and adjusting data as needed a basemap can be put together very easily using the <code>tmap</code> functionality. After setting your bounding box or “Area of Interest” you are off to the races specifying where the layers sit (like in ArcGIS), what color, line type, point type, etc. Below is from the r-script (<a href="https://github.com/SwampThingPaul/rstat_mapping/blob/6cb5b478149678830c7e9d5e09de66918623ce94/X_rstat_map.R" target="_blank">link</a>), some layers are called twice for effect.</p>
+<script src="{{ site.url }}{{ site.baseurl }}\_knitr\https:\gist.github.com\SwampThingPaul\c272a1556f5104da5cdd9e51c8b4bca9.js"></script>
+<!--
+```
+bbox=raster::extent(473714,587635,2748300,2960854);#Bounding box for our Area of Interest (AOI)
 base.map=tm_shape(shore,bbox=bbox)+tm_polygons(col=cols[1])+
-  tm_shape(eaa)+tm_fill(&quot;olivedrab1&quot;)+tm_borders(&quot;grey&quot;,lwd=1.5,lty=1.75)+
-  tm_shape(spsample(eaa,&quot;random&quot;,n=500,pretty=F))+
-  tm_dots(col=&quot;grey80&quot;,size=0.005)+
-  tm_shape(c139)+tm_fill(&quot;grey&quot;)+
-  tm_shape(sta)+tm_polygons(&quot;skyblue&quot;)+
-  tm_shape(rs.feat)+tm_polygons(&quot;steelblue3&quot;)+
-  tm_shape(rs.feat.hatch)+tm_lines(col=&quot;grey&quot;)+
-  tm_shape(wma)+tm_borders(&quot;grey50&quot;,lwd=1.5,lty=2)+tm_fill(cols[3])+
+  tm_shape(eaa)+tm_fill("olivedrab1")+tm_borders("grey",lwd=1.5,lty=1.75)+
+  tm_shape(spsample(eaa,"random",n=500,pretty=F))+
+  tm_dots(col="grey80",size=0.005)+
+  tm_shape(c139)+tm_fill("grey")+
+  tm_shape(sta)+tm_polygons("skyblue")+
+  tm_shape(rs.feat)+tm_polygons("steelblue3")+
+  tm_shape(rs.feat.hatch)+tm_lines(col="grey")+
+  tm_shape(wma)+tm_borders("grey50",lwd=1.5,lty=2)+tm_fill(cols[3])+
   tm_shape(wma.hatch)+
   tm_lines(col=cols[5],lwd=2)+tm_shape(wma)+
-  tm_borders(&quot;grey50&quot;,lwd=2,lty=1)+
-  tm_shape(wca)+tm_fill(&quot;white&quot;)+
+  tm_borders("grey50",lwd=2,lty=1)+
+  tm_shape(wca)+tm_fill("white")+
   tm_shape(bcnp)+tm_fill(cols[4])+
-  tm_shape(enp.shore)+tm_fill(&quot;white&quot;)+tm_borders(&quot;dodgerblue3&quot;,lwd=1)+
-  tm_shape(canal)+tm_lines(&quot;dodgerblue3&quot;,lwd=2)+
+  tm_shape(enp.shore)+tm_fill("white")+tm_borders("dodgerblue3",lwd=1)+
+  tm_shape(canal)+tm_lines("dodgerblue3",lwd=2)+
   tm_shape(canal)+tm_lines(cols[2],lwd=1)+
-  tm_shape(evpa)+tm_borders(col=&quot;red&quot;,lwd=1.5);</code></pre>
+  tm_shape(evpa)+tm_borders(col="red",lwd=1.5);
+```
+-->
 <p>Once the base map is put together to your liking, then you can layer on points, rasters, etc. very simply.</p>
 <pre><code>base.map+tm_shape(TN.GM)+tm_symbol();</code></pre>
 <p>Use the <code>png() ... dev.off()</code> function to write the plot to a file or use the <code>tmap_save()</code> function.</p>
@@ -73,7 +79,7 @@ base.map=tm_shape(shore,bbox=bbox)+tm_polygons(col=cols[1])+
 <div id="adding-inset-maps" class="section level1">
 <h1>Adding inset maps</h1>
 <p>Adding an inset or regional map is sometime the go-to thing, expecially for ecological studies. This helps put the study in a regional or national context and orient people to your study area.</p>
-<p>Using the exsisting <a href="https://github.com/SwampThingPaul/rstat_mapping/blob/f64c19d9c00d66986d969b4c7d2e02c9c88407fe/X_rstat_map.R">code</a> and data posted in this repository in conjunction with <code>Viewport()</code> in the <code>library(grid)</code> or <code>tmap_save()</code>.</p>
+<p>Using the exsisting <a href="https://github.com/SwampThingPaul/rstat_mapping/blob/f64c19d9c00d66986d969b4c7d2e02c9c88407fe/X_rstat_map.R" target="_blank">code</a> and data posted in this repository in conjunction with <code>Viewport()</code> in the <code>library(grid)</code> or <code>tmap_save()</code>.</p>
 <img src="{{ site.url }}{{ site.baseurl }}\images\20181222_rstatmap\map_inset.png" width="75%" style="display: block; margin: auto;" />
 <center>
 Map of annual mean total nitrogen concentrations from sites within the Everglades Protection Area (Southern Florida) with an regional map identifying the area of interest.
