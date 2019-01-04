@@ -35,7 +35,7 @@ knitr::include_graphics("../images/20190104_reflection/DSCN8559.JPG")
 knitr::include_graphics("../images/20190104_reflection/DSCN8724.JPG")
 ```
 
-During my reflection, I realized among some I have a particular reputation. Some find me grumpy and crass (not afraid of dropping the f-bomb...after all I did get a "Parental Advisory" and "Curmudgeon"" badge at a conference...see below"), some find me as a troublemaker (boat rocker), some see me as a crazy hippy, some see a jock (yes, I play collegiate sports), some see a goof-ball and some find me sharing and open. Maybe these are all my different personalities but its all me. 
+During my reflection, I realized among some I have a particular reputation. Some find me grumpy and crass (not afraid of dropping the f-bomb...after all I did get a "Parental Advisory" and "Curmudgeon"" badge at a conference...see below"), some find me as a troublemaker (boat rocker), some see me as a crazy hippy, some see a jock (yes, I played collegiate sports, guess which one), some see a goof-ball and some find me sharing and open. Maybe these are all my different personalities but its all me. 
 
 ```{r 4, out.width="50%",echo=FALSE,fig.align="center"}
 knitr::include_graphics("../images/20190104_reflection/badge.jpg")
