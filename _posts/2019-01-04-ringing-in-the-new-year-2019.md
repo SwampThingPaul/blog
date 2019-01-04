@@ -12,14 +12,19 @@ layout: post
 <hr />
 <p>Before the start to the New Year I decided that a break from social media (i.e. Twitter) will do me some good in an attempt to give me a refresh.</p>
 <div class="figure" style="text-align: center">
-<img src="{{ site.url }}{{ site.baseurl }}\images\20190104_reflection\tweet.png" alt="[See Paul Julian, PhD's other Tweets](https://twitter.com/SwampThingPaul)" width="50%" />
+<img src="{{ site.url }}{{ site.baseurl }}\images\20190104_reflection\tweet.png" alt="[See Paul Julian, PhD's other Tweets](https://twitter.com/SwampThingPaul)" width="75%" />
 <p class="caption">
 <a href="https://twitter.com/SwampThingPaul">See Paul Julian, PhD’s other Tweets</a>
 </p>
 </div>
 <p>Originally I was going to write a thread on twitter upon my return but the thread turned into a saga…so I decide to put it together as a blog post. While not overly long, this is my initial thoughts upon my reflection…which reminds me of a quote from a great movie that has stuck with me throughout the years. I indeed am on a rigid search and am beginning to see everything illuminated in the light of the past.</p>
-<p><img src="{{ site.url }}{{ site.baseurl }}\images\20190104_reflection\EverythingIlluminated_quote.png" width="50%" style="display: block; margin: auto;" /></p>
-<p>This week I took a slight hiatus from twitter in an effort to help me focus, reflect and realign. Overall the break was good, the first couple of days I felt like I was missing out…guess what? I wasn’t missing anything really but am quickly getting up to speed on posts from colleagues and friends. The world didn’t end because I didn’t check my twitter, who would have imagined. I think to some degree we get trapped in our digital world because we work and play so much in digital space now a days that it tough to break away. During this break my wife and I did some hiking which was a great respite to all the craziness in the world and in my head. We explored the wild Florida scrub of <a href="http://www.leegov.com/conservation2020/preserves/preserve?projid=8">Bob Janes Preserve</a> and amazingly peaceful wet Cypress and Pond Apple domes of <a href="https://www.nps.gov/bicy/index.htm">Big Cypress National Preserve</a>.</p>
+<div class="figure" style="text-align: center">
+<img src="{{ site.url }}{{ site.baseurl }}\images\20190104_reflection\EverythingIlluminated_quote.png" alt="[Everything Is Illuminated (2005)](https://www.imdb.com/title/tt0404030/quotes/qt0237674)" width="75%" />
+<p class="caption">
+<a href="https://www.imdb.com/title/tt0404030/quotes/qt0237674">Everything Is Illuminated (2005)</a>
+</p>
+</div>
+<p>This week I took a slight hiatus from twitter in an effort to help me focus, reflect and realign. Overall the break was good, the first couple of days I felt like I was missing out…guess what? I wasn’t missing anything really but am quickly getting up to speed on posts from colleagues and friends. The world didn’t end because I didn’t check my twitter, who would have imagined. I think to some degree we get trapped in our digital world because we work and play so much in digital space now a days that it tough to break away. During this break my wife and I did some hiking which was a great respite to all the craziness in the world and in my head. We explored the wild Florida scrub of <a href="http://www.leegov.com/conservation2020/preserves/preserve?projid=8">Bob Janes Preserve</a> and amazingly peaceful wet Cypress and Pond Apple domes of <a href="https://www.nps.gov/bicy/index.htm">Big Cypress National Preserve</a>. Literally two extremely different and constrasting ecosystems…I am sure there is some symbolism in this…</p>
 <p><img src="{{ site.url }}{{ site.baseurl }}\images\20190104_reflection\DSCN8559.JPG" width="75%" style="display: block; margin: auto;" /></p>
 <p><img src="{{ site.url }}{{ site.baseurl }}\images\20190104_reflection\DSCN8724.JPG" width="75%" style="display: block; margin: auto;" /></p>
 <p>During my reflection, I realized among some I have a particular reputation. Some find me grumpy and crass (not afraid of dropping the f-bomb…after all I did get a “Parental Advisory” and “Curmudgeon”&quot; badge at a conference…see below“), some find me as a troublemaker (boat rocker), some see me as a crazy hippy, some see a jock (yes, I play collegiate sports), some see a goof-ball and some find me sharing and open. Maybe these are all my different personalities but its all me.</p>
