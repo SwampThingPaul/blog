@@ -7,7 +7,7 @@ output:
   highlight: github
 ---
 
-__Keywords:__ imposer syndrome, social media, mental health, work-life balance.
+__Keywords:__ impostor syndrome, social media, mental health, work-life balance.
 
 ***
 

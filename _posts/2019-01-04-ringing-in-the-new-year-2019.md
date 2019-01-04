@@ -8,7 +8,7 @@ layout: post
 
 
 <section class="main-content">
-<p><strong>Keywords:</strong> imposer syndrome, social media, mental health, work-life balance.</p>
+<p><strong>Keywords:</strong> impostor syndrome, social media, mental health, work-life balance.</p>
 <hr />
 <p>Before the start to the New Year I decided that a break from social media (i.e. Twitter) will do me some good in an attempt to give me a refresh.</p>
 <div class="figure" style="text-align: center">
