@@ -1,5 +1,5 @@
 ---
-title: "Geospatial data analysis in #rstats"
+title: "Geospatial data analysis in #rstats. Part 1"
 date: " "
 output: 
   prettydoc::html_pretty:
@@ -9,18 +9,13 @@ editor_options:
   chunk_output_type: console
 ---
 
-__Keywords:__ kriging, geostatistics, ArcGIS, R
+__Keywords:__ kriging, geostatistics, ArcGIS, R, soil science
 
 ***
 
 Many (many) years ago after graduating from undergrad I was introduced to geographical information systems (GIS) at the time ArcInfo developed by [ESRI](https://www.esri.com/en-us/home) was the leading software to develop, visualise and analyse geospatial data. I quickly took to learning the ins and outs of this software burrowing and begging for licenses to feed my despire to learn GIS. Eventually I moved onto my masters degree where I was able to apply a lot of what I learned. Throughout my career I have had and ESRI icon on my desktop. But it wasn't until I started to learn [R](https://cran.r-project.org/) that I began to see some of the downfalls of the this iconic software. Yes, ArcGIS and its cousins ([GRASS](https://grass.osgeo.org/) and [QGIS](https://qgis.org/en/site/)) are valuable, powerful and irreplaceable analytical tools...no question. Something you learn with R is reproduability and easly tracking what you have done. In spreadsheets (i.e. excel) it tough to find out what cells are calculated and how, in R its all in front of you. In ArcGIS there are countless steps (and clicks) to read in data, project, transform, clip, interpolate, reformat, export, plot, etc.  Unless you are a [python](https://www.python.org/) wizard, most of this is reliant on your ability to remember/document the steps necessary to go from raw data to final product in ArcGIS. Reproducability in data analysis is essental which is why I turned to conducting geospatial analyses in R. Additionally, typing and executing commands in the R console, in many cases is faster and more efficient than pointing-and-clicking around the graphical user interface (GUI) a desktop GIS. 
 
-Thankfully, the R community has contributed trumendously to expand R's ability to conduct spatial analyses by integrating tools from geography, geoinformatics, geocompution and spatial statistics. R’s wide range of spatial capabilities would never have evolved without people willing to share what they were creating or adapting ([Lovelace et al 2019](https://geocompr.robinlovelace.net/){target="_blank"}). The book by Lovelace et al is great start to learning geospatial analysis in R. In addition to this book there are countless other books r-connect pages, blogs, white papers, etc. dedicated to analysing, modeling and visulaizing geospatial data. I emplore you to explore the web for these resources as this blog post is not the one stop shop for info. 
-
-```{r 0, out.width="25%",echo=FALSE,fig.align="center",fig.cap="[Geocomputation with R](https://geocompr.robinlovelace.net/)"}
-knitr::include_graphics("https://geocompr.robinlovelace.net/images/cover.png")
-```
-
+Thankfully, the R community has contributed trumendously to expand R's ability to conduct spatial analyses by integrating tools from geography, geoinformatics, geocompution and spatial statistics. R’s wide range of spatial capabilities would never have evolved without people willing to share what they were creating or adapting ([Lovelace et al 2019](https://geocompr.robinlovelace.net/){target="_blank"}). There are countless other books r-connect pages, blogs, white papers, etc. dedicated to analysing, modeling and visulaizing geospatial data. I emplore you to explore the web for these resources as this blog post is not the one stop shop for info. 
 
 # [Brass Tacks](https://en.wiktionary.org/wiki/get_down_to_brass_tacks){target="_blank"}
 
@@ -46,6 +41,7 @@ library(spatstat)
 library(maptools)
 library(rgeos)
 library(spdep)
+library(spsurvey)
 
 library(tmap)
 library(GISTools)
@@ -55,7 +51,7 @@ library(rasterVis)
 
 ```{r data, include=F}
 uf.cols.muted=c(rgb(108/255,154/255,195/255,1,"gator.blue"),rgb(226/255,143/255,65/255,1,"gator.orange"));#office style colors from UF
-
+source("D:/commonlyusedfunctions.r")
 wd="D:/UF/TaylorSlough/UTS_Soil"
 
 gis.path=paste0(wd,"/GIS_Data")
@@ -69,6 +65,7 @@ loc.dat.raw=loc.dat1@data[,c("UTMX","UTMY")]
 sp.mod.dat=exp(7.668e-5*loc.dat1@data$UTMY+(-2.099e2))
 sp.mod.dat=sp.mod.dat*runif(length(sp.mod.dat),1.2,2.0)
 loc.dat1@data$TP_mgkg=sp.mod.dat;#fake data with a spatial gradient
+#write.csv(loc.dat1@data,"D:/_GitHub/blog/images/20190130_Geospatial/loc_dat.csv",row.names=F)
 
 grid=readOGR(paste(gis.path,"/StudyArea_Grid",sep=""),"StudyArea_grid")
 attributes(grid)$proj4string
@@ -90,14 +87,14 @@ sp.dat=loc.dat1
 
 To read shapefiles such as ESRI `.shp` files into R you can use the `readOGR` function in the `rgdal` library. Feel free to get familar with with function by typing `?readOGR` into the R console. Evertime I read a spatial dataset into R I also check the projection using `attributes(sp.data)$proj4string` to make sure all my spatial data is in the correct project. If necessary re-projection of the data is easy.
 
-```
-sp.dat=readOGR(dsn=".../data path/spatial data"),layer="SampleSites")
+```{r ,echo=T,message=F,warning=F,eval=F}
+sp.dat=readOGR(dsn=".../data path/spatial data",layer="SampleSites")
 attributes(sp.data)$proj4string
 ```
 
 If you have raw data file, like say from a GPS or a random excel file with lat/longs read in the file like you noramlly do using `read.csv()` or `openxlsx::read.xlsx()` and apply the necessary projection `proj.data`. Here is a great lesson on coordinate reference system with some R-code ([link](https://www.earthdatascience.org/courses/earth-analytics/spatial-data-r/intro-to-coordinate-reference-systems/){target="_blank"}) and some additional [information](https://rspatial.org/spatial/6-crs.html?highlight=coordinates#){target="_blank"} incase you are unfamilar with CRS and how it applies.
 
-```
+```{r ,echo=T,message=F,warning=F,eval=F}
 loc.dat.raw=read.csv(loc_data.csv)
 ```
 
@@ -112,7 +109,7 @@ loc.dat.raw=SpatialPointsDataFrame(coords=loc.dat.raw[,c("UTMX","UTMY")],
 ```
 
 It always good to take a look at the data spatially before moving forward to ensure the data is correct. You can use the generate `plot` function for a quick look at the data. 
-```
+```{r ,echo=T,message=F,warning=F,eval=F}
 plot(sp.dat,pch=21)
 
 ```
@@ -122,28 +119,17 @@ plot(loc.dat.raw, pch=21)
 box()
 ```
 
-## Spatial Autocorrelation
-
-Most if not all field data can be characterized as spatial data, especially in ecology. If something is sampled at a particular location there is a spatial component to the data. As such there are some spatial specific statistics that be applied to spatial data to explain how the data relates to the world. One such statistic is spatial autocorrelation. 
-
-Spatial autocorrelation measures the degree to which a phenomenon of interest is correlated to itself in space. This statistical analysis evaluates whether the observed value of a variable at one location is independent of values of that variability at neighboring locations.
-
-* Positive spatial autocorrelation indiates similar values appear close to each other (i.e. clustered in space).
-
-* Negative spatial autocorrelation indicates that neighboring values are dissimilar (i.e. dispersed in space).
-
-* No spatial autocorrelation indicates that the spatial pattern is completely random.
-
-*Moran's I* is the most common spatial autocorrelation test however other tests are availalbe (i.e. Geary's C, Join Counts, etc.)
 
 
-### Interpolations
+## Interpolations
 
 ***This section is modeled from [Chapter 14](https://mgimond.github.io/Spatial/spatial-interpolation.html){target="_blank"} of [Gimond (2018)](https://mgimond.github.io/Spatial/index.html){target="_blank"}.***
 
+### Proximity (Thessian)
+
 The most basic and simplest interpolation is proximity interpolation, where thiessen polygons are drawn based on the existing monitoring network to approimate all unsampled locations. This processes generates a tessellated surface whereby lines that split the midpoint betweem each sampled location are connected. One obvious issue with this approach is that values can change abruptly between tessilated boundries and may not accurately represent _in-situ_ conditions. 
 
-Despite these downfalls, lets create a thessian polygon and see how the data looks. Using hte `dirichlet()` function, we can create a tessellated surfce very easily unfortunately it is not spatially explict (i.e. doesn't have a CRS). Also the surface extends beyond the study area, so it will need to be clipped to the extent of the study area (a seperate shapefile). 
+Despite these downfalls, lets create a thessian polygon and see how the data looks. Using the `dirichlet()` function, we can create a tessellated surfce very easily unfortunately it is not spatially explict (i.e. doesn't have a CRS). Also the surface extends beyond the study area, so it will need to be clipped to the extent of the study area (a seperate shapefile). R-scripts can be found at this [link](https://gist.github.com/SwampThingPaul/0398073092ba337bf86862a6e1d6d45d){target="_blank"}.
 
 
 ```{r ,echo=T,message=F,warning=F}
@@ -160,6 +146,19 @@ th.spdf=SpatialPolygonsDataFrame(th,th.z)
 # Clip to study area
 th.clp=raster::intersect(study.area,th.spdf)
 ```
+
+```{r ,echo=T,message=F,warning=F,eval=F}
+## Alternative method 
+## some have run into issues with dirichlet()
+bbox.study.area=bbox(study.area)
+
+bbox.da=c(bbox.study.area[1,1:2],bbox.study.area[2,1:2])
+th=dismo::voronoi(sp.dat,ext=bbox.da)
+th.z=sp::over(th,sp.dat)
+th.z.spdf=sp::SpatialPolygonsDataFrame(th,th.z)
+th.clp=raster::intersect(study.area,th.z.spdf)
+```
+
 
 ```{r thessian plot,fig.height=4,fig.width=6,echo=FALSE,fig.align="center",fig.cap="**Left:** All sampling points within the study area. **Middle:** Thessian polyon for all sampling locations. **Right:** Thessian polygons clipped to study area."}
 par(family="serif",mar=c(1,1,1,1),oma=c(0.5,0.5,0.5,0.5));
@@ -185,6 +184,99 @@ tm_shape(th.clp) +
   tm_compass(north=0,position=c("left","top"))+
   tm_scale_bar(breaks=c(0,1),size=0.75,position=c("left","top"))+tm_layout(fontfamily = "serif",compass.type = "arrow")
 ```
+
+Ok, so now you have a spatial estimate of data across your sampling area/study site, now what? We can determine how much of the area is above or below a particular threshold by constructing a cumulative distribution function (cdf) with the data. Using the `cont.analysis` function in the `spsurvey` package we can generate the cdf. 
+
+```{r ,echo=T,message=F,warning=F}
+# Determine the area for each polygon 
+#(double check coordinate system, the data is currently in UTM measured in meters)
+th.clp$area_sqkm=rgeos::gArea(th.clp,byid=T)*1e-6
+
+#remove any NA's in the data
+th.clp= subset(th.clp,is.na(TP_mgkg)==F)
+
+#extracts data frame form the spatial data
+cdf.area=data.frame(th.clp@data)
+
+Sites=data.frame(siteID=cdf.area$Site,Use=rep(TRUE, nrow(cdf.area)))
+Subpop=data.frame(siteID=cdf.area$Site,Area=cdf.area$area_sqkm)
+Design=data.frame(siteID=cdf.area$Site,wgt=cdf.area$area_sqkm)
+Data.TP=data.frame(siteID=cdf.area$Site,TP=cdf.area$TP_mgkg)
+
+cdf.estimate=cont.analysis(sites=Sites,
+                           design=Design,
+                           data.cont=Data.TP,
+                           vartype='SRS',
+                           pctval = seq(0,100,0.5));
+```
+
+```{r cdf plot,message=F,warning=F,fig.height=4.5,fig.width=6,echo=FALSE,fig.align="center",fig.cap="Cumulative distribution function (\u00B1 95% CI) of soil total phosphorus concentration (**NOT REAL DATA**) across the study area"}
+par(family="serif",mar=c(1.5,1.5,1,0.5),oma=c(2,2,0.25,0.5),mgp=c(3,1,0));
+ylim.val=c(0,100);by.y=25;ymaj=seq(ylim.val[1],ylim.val[2],by.y);ymin=seq(ylim.val[1],ylim.val[2],by.y/2)
+xlim.val=c(200,700);by.x=100;xmaj=seq(min(0,xlim.val[1]),xlim.val[2],by.x);xmin=seq(min(0,xlim.val[1]),xlim.val[2],by.x/2)
+
+plot(Estimate.P~Value,cdf.estimate$CDF,ylim=ylim.val,xlim=xlim.val,yaxt="n",xaxt="n",ylab=NA,xlab=NA,type="n")
+abline(h=ymaj,v=xmaj,lty=3,col="grey")
+with(cdf.estimate$CDF,shaded.range(Value,LCB95Pct.P,UCB95Pct.P,bg="black"))
+with(cdf.estimate$CDF,lines(Value,Estimate.P,lty=1,lwd=2,col="indianred1"))
+axis_fun(1,xmaj,xmin,xmaj,1)
+axis_fun(2,ymaj,ymin,ymaj,1);box(lwd=1)
+
+mtext(side=2,line=1,"Percent Area",outer=T,cex=1)
+mtext(side=1,line=2,"Soil Total Phosphorus Concentration (mg kg\u207B\u00B9)")
+leg.txt=c("CDF Estimate", "95% Confidence Limits")
+leg.cols=c("indianred1",adjustcolor("black",0.25))
+legend("topleft",legend=leg.txt,col=leg.cols,pt.bg=c(NA,leg.cols[2]),lty=c(1,0),pt.cex=1.5,pch=c(NA,22),cex=0.9,ncol=1,bty="n",y.intersp=1,x.intersp=0.75,xpd=NA,xjust=0.5)
+
+```
+
+Now we can determine how much area is above/below a particular concentration. 
+
+```{r ,echo=T,message=F,warning=F}
+cdf.data=cdf.estimate$CDF
+
+threshold=500; #Soil TP threshold in mg/kg
+
+result=min(subset(cdf.data,Value>500)$Estimate.P)
+low.CI=min(subset(cdf.data,Value>500)$LCB95Pct.P)
+up.CI=min(subset(cdf.data,Value>500)$UCB95Pct.P)
+
+```
+
+* Using the code above we have determined that approximately `r round(result,1)`% (Lower 95% CI: `r round(low.CI,1)`% and Upper 95% CI: `r round(up.CI,1)`%) of the study area is equal to or less than 500 mg TP kg^-1^.
+
+We can also ask at what concentration is 50% of the area?
+
+```{r ,echo=T,message=F,warning=F}
+threshold=50; #Percent area
+
+result=max(subset(cdf.data,Estimate.P<threshold)$Value)
+```
+
+* Using the code above we can say that 50% of the area is equal to or less than `r round(result)` mg TP kg^-1^.
+
+***
+
+### Kriging
+
+As computer technology has advanced so has the ability to conduct more advance methods of interpolation. A common advanced interpolation techinque is [Kriging](https://en.wikipedia.org/wiki/Kriging){target="_blank"}. Generally, kriging typically gives the best lieanr unbiased prediction of the intermediate values. There are several types of kriging that can be applied such as *Ordinary*, *Simple*, *Universal*, etc which depend on the stochastic properties of the random field and the various degrees of stationarity assumed. In the following section I will demonstrate *Ordinary Kriging*. 
+
+Kriging takes generally 4-steps:
+
+1. Remove any spatial trend in teh data (if present).
+
+2. Compute the experimental variogram, measures of spatial autocorrelation.
+
+3. Define the experimental variogram model that is best characterized the spatial autcorrelation in the data.
+
+4. Interpolate the surface using the experimental variogram.
+
+   * add the kriged interpolated surface to the trend interpolated surface to produce the final output. 
+
+
+**Easy Right?**
+Actually the steps are very limited, fine tuning (i.e. optimizing) is the hard part. 
+
 
 ***
 

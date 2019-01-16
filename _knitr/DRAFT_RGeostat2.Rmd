@@ -1,0 +1,28 @@
+---
+title: "Geospatial data analysis in #rstats. Part 2"
+date: " "
+output: 
+  prettydoc::html_pretty:
+  theme: default
+  highlight: github
+editor_options: 
+  chunk_output_type: console
+---
+
+__Keywords:__ geostatistics, R, soil science
+
+## Spatial Autocorrelation
+
+Most if not all field data can be characterized as spatial data, especially in ecology. If something is sampled at a particular location there is a spatial component to the data. As such there are some spatial specific statistics that be applied to spatial data to explain how the data relates to the world. One such statistic is spatial autocorrelation. 
+
+Spatial autocorrelation measures the degree to which a phenomenon of interest is correlated to itself in space. This statistical analysis evaluates whether the observed value of a variable at one location is independent of values of that variability at neighboring locations.
+
+* Positive spatial autocorrelation indiates similar values appear close to each other (i.e. clustered in space).
+
+* Negative spatial autocorrelation indicates that neighboring values are dissimilar (i.e. dispersed in space).
+
+* No spatial autocorrelation indicates that the spatial pattern is completely random.
+
+*Moran's I* is the most common spatial autocorrelation test however other tests are availalbe (i.e. [Geary's C](https://en.wikipedia.org/wiki/Geary%27s_C){target="_blank"}, [Join-Count](https://mltconsecol.github.io/TU_LandscapeAnalysis_Documents/Assignments_web/Assignment06_Autocorrelation.pdf){target="_blank"}, etc.) each have a specific application much like the different correlation analyses (i.e. Pearson's, Spearman, Kendall, etc.). Moreover the spatial autocorrelation analysis of spatial data is realtively straigh forward. 
+                                                                                                                                                                                                                                                                                                                                                                                                                
+                                                                                                                                                                                                                                                                                                                                                                                                                

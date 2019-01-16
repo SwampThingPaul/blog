@@ -24,5 +24,7 @@
 #prettyjekyll::FormatPost("_knitr/2019-01-04-NewYearOldMe.Rmd")
 #file.remove("_knitr/2019-01-04-NewYearOldMe.html")
 
+#prettyjekyll::FormatPost("_knitr/2019-01-16-FCELTER.Rmd")
+
 
 #file.create("_knitr/test.Rmd")
