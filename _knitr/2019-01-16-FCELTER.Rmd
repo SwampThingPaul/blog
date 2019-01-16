@@ -4,9 +4,7 @@ date: "January 16, 2019"
 output: 
   prettydoc::html_pretty:
   theme: default
-highlight: github
-editor_options: 
-  chunk_output_type: console
+  highlight: github
 ---
 
 
