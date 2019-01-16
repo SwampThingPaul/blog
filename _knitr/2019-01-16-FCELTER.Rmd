@@ -92,14 +92,14 @@ In the mod 1900s environmental and scientific communities began growing concern 
 As part of the Everglades Protection Act, the state of Florida initiated design of a storm water management system intended to improve water quality entering the Everglades ecosystem and by 1994 the Everglades Nutrient Removal Project (ENR) was operational. Eventually additional storm water treatment areas (STAs) were to the current configuration of five-storm water STAs achieving a total of 2.3 x 10^6^ kilograms (kg) of phosphorus (circa April 2017). Initiated with the construction of the ENR, coverage of STAs have steadily increased to 230 km^2^ of submerged and emergent aquatic vegetation treatment wetlands (Chimney 2018). In addition to STA coverage, flow-equalization basins (FEBs) are also being utilized to store and attenuate water to the STAs during period of low water (i.e. dry season). A total of three-FEBs are planned, two of which are completed and in operation. Both the A-1 (constructed and operational) and C-139 (planned, completion by 2023) FEB utilize shallow surface water storage where vegetation will opportunistically remove phosphorus from the water column prior to delivering water to the STAs. The A-1 FEB is capable of storing 7.4 x 10^7^ m^3^ (60,000 acre-feet) through 60 km^3^ of aboveground storage for STA-2 and 3/4 while the C-139 FEB is expected to provide 1.4 x 10^7^ m^3^ (11,000 acre-feet) of aboveground storage for flows to STA 5/6 (South Florida Water Management District 2012; Laham-Pass 2017). Meanwhile the L-8 FEB utilizes deep surface water storage to store 5.5 x 10^7^ m^3^ (45,000 acre-feet; Xue 2017) to attenuate flows to STA-1W and 1E. Additional storage in the regional is expected with upcoming state and federal authorization, how it will relate to STA operations is currently unknown. 
 
 
-```{r STA area,echo=F,message=F,warning=F}
+```{r STAarea,echo=F,message=F,warning=F}
 STA.area=read.csv("D:/UF/LTER/Projects/System Dynamics/Data/STA_area_sum.csv")
 area.sum=ddply(STA.area,"Cyr",summarise,TArea=sum(Area_km2,na.rm=T))
 area.sum$cum.sum.area=cumsum(area.sum$TArea)
 ```
 
 
-```{r sta area,fig.height=3.5,fig.width=6,echo=FALSE,fig.align="center",fig.cap="Current and expected (estimated) cumulative stormwater treatment area (STA) and flow-equalization basin (FEB) coverage with the Everglades ecosystem. Actual cumulative annual areal extent of STA and FEB coverage identified by grey points. Dashed vertical line indicates to current."}
+```{r STAarea_plot,fig.height=3.5,fig.width=6,echo=FALSE,fig.align="center",fig.cap="Current and expected (estimated) cumulative stormwater treatment area (STA) and flow-equalization basin (FEB) coverage with the Everglades ecosystem. Actual cumulative annual areal extent of STA and FEB coverage identified by grey points. Dashed vertical line indicates to current."}
 par(family="serif",mar=c(0.5,1.5,1,0.75),oma=c(3,3,0.25,0.25),mgp=c(3,1,0));
 xlim.val=c(1994,2026);by.x=8;xmaj=seq(xlim.val[1],xlim.val[2],by.x);xmin=seq(xlim.val[1],xlim.val[2],by.x/by.x)
 ylim.val=c(0,400);by.y=100;ymaj=seq(ylim.val[1],ylim.val[2],by.y);ymin=seq(ylim.val[1],ylim.val[2],by.y/2)
@@ -140,10 +140,10 @@ enp.hurr=enp.hurr[order(enp.hurr$WY_start,enp.hurr$Key),]
 hurr.N.enp=ddply(enp.hurr,c("WY_start"),summarise,N.val=N(Key))
 hur.tck2=subset(hur.tck,Key%in%enp.hurr$Key)
 
-plot(N.val~WY_start,hurr.N.enp)
+#plot(N.val~WY_start,hurr.N.enp)
 hurr.N.enp=merge(hurr.N.enp,data.frame(WY_start=seq(1851,2017,1),fill=1),"WY_start",all.y=T)
 hurr.N.enp$N.val=with(hurr.N.enp,ifelse(is.na(N.val),0,N.val))
-plot(N.val~WY_start,hurr.N.enp,type="l")
+#plot(N.val~WY_start,hurr.N.enp,type="l")
 
 All_Hurricanes=hur.tck
 ENP_Hurricanes_25km=hur.tck2
@@ -156,11 +156,11 @@ map=tm_shape(enp)+tm_polygons(col="dodgerblue1",alpha=0.2)+
 
 ```
 
-```{r hurricane map,echo=F,out.width="100%",fig.align="center",fig.cap="Atlantic Basin Hurricane and Tropical Storm center lines."}
+```{r hurricane_map,echo=F,out.width="100%",fig.align="center",fig.cap="Atlantic Basin Hurricane and Tropical Storm center lines."}
 tmap_leaflet(map)
 ```
 
-```{r hurricane freq,fig.height=3.5,fig.width=6,echo=FALSE,fig.align="center",fig.cap="Frequency of Tropical Storms or Hurricanes that pass within 200 km of ENP. Based on Florida Water Year (May 1^st^ to Apirl 30^th^)."}
+```{r hurricane_freq,fig.height=3.5,fig.width=6,echo=FALSE,fig.align="center",fig.cap="Frequency of Tropical Storms or Hurricanes that pass within 200 km of ENP. Based on Florida Water Year (May 1^st^ to Apirl 30^th^)."}
 par(family="serif",mar=c(1,1.5,1,0.75),oma=c(2,3,0.25,0.25),mgp=c(3,1,0));
 xlim.val=c(1850,2017);by.x=20;xmaj=seq(xlim.val[1],xlim.val[2],by.x);xmin=seq(xlim.val[1],xlim.val[2],by.x/by.x)
 ylim.val=c(0,5);by.y=1;ymaj=seq(ylim.val[1],ylim.val[2],by.y);ymin=seq(ylim.val[1],ylim.val[2],by.y/by.y)
@@ -185,7 +185,7 @@ knitr::include_graphics("../images/20190116_FCE/waterbudget.jpg")
 ```
 
 
-```{r WL data,include=FALSE,warning=FALSE,message=FALSE,echo=FALSE}
+```{r WL_data,include=FALSE,warning=FALSE,message=FALSE,echo=FALSE}
 dates=as.Date(c("1992-05-01","2017-05-01"))
 wca3.stg=data.frame()
 dbkey.list.stg=data.frame(SITE=c("CA362","CA363"),DBKEY=c("16536","16532"))
@@ -208,12 +208,12 @@ stgdata.xtab$high.water=with(stgdata.xtab,ifelse(rollsum.rec.close==60,1,0))
 
 HW_years=ddply(stgdata.xtab,"FLWY",summarise,N.HW=sum(high.water,na.rm=T),days.above=sum(rec.close,na.rm=T),per.days.above=(sum(rec.close,na.rm=T)/N(Mean.6263))*100)
 
-plot(Mean.6263~Date.EST,stgdata.xtab)
+#plot(Mean.6263~Date.EST,stgdata.xtab)
 
 ```
 
 
-```{r WL plot,fig.height=4,fig.width=6,echo=FALSE,fig.align="center",fig.cap="Daily water level of northern WCA-3A (CA3-62 and CA3-63 sites) used to indicate high water conditions."}
+```{r WL_plot,fig.height=4,fig.width=6,echo=FALSE,fig.align="center",fig.cap="Daily water level of northern WCA-3A (CA3-62 and CA3-63 sites) used to indicate high water conditions."}
 par(family="serif",mar=c(0.5,1.5,1,0.75),oma=c(1.5,3,0.25,0.25),mgp=c(3,1,0));
 xlim.val=date.fun(dates);xmaj=seq(xlim.val[1],xlim.val[2],"5 years");xmin=seq(xlim.val[1],xlim.val[2],"1 years")
 ylim.val=c(8,14);by.y=2;ymaj=seq(ylim.val[1],ylim.val[2],by.y);ymin=seq(ylim.val[1],ylim.val[2],by.y/by.y)
@@ -230,7 +230,7 @@ mtext(side=2,line=2,"Stage Elevation (Ft, NGVD29)")
 
 Daily average water level, as expressed by elevation according to the [National Geodetic Vertical Datum](https://www.ngs.noaa.gov/datums/vertical/national-geodetic-vertical-datum-1929.shtml){target="_blank"} can be used by ecosystem managers to gauge the status of the system. One such metric is a high-water closure criteria indicating that the water level (and depth) it too high. In addition to the absolute water-level duration is also a concern as high water events of long duration can significantly impact the ecology of system. High water years typically occur in response to tropical storms (i.e. Hurricanes) and/or period of extended rainfall (see below). 
 
-```{r High water,fig.height=4,fig.width=6,echo=FALSE,fig.align="center",fig.cap="Percent of days above high water crtiera within Water Conservation 3A."}
+```{r High_water,fig.height=4,fig.width=6,echo=FALSE,fig.align="center",fig.cap="Percent of days above high water crtiera within Water Conservation 3A."}
 par(family="serif",mar=c(1,1.5,1,0.75),oma=c(2,3,0.25,0.25),mgp=c(3,1,0));
 xlim.val=c(1993,2018);by.x=5;xmaj=seq(xlim.val[1],xlim.val[2],by.x);xmin=seq(xlim.val[1],xlim.val[2],by.x/by.x)
 ylim.val=c(0,50);by.y=10;ymaj=seq(ylim.val[1],ylim.val[2],by.y);ymin=seq(ylim.val[1],ylim.val[2],by.y/2)
@@ -251,7 +251,7 @@ Drought is a significant driving force for aquatic ecosystems. In the Everglades
 
 $$ SRA = \frac{P_{R} - P_{m}}{\sigma} \quad\quad (Eq. 1)$$
 
-```{r rainfall data,include=FALSE,warning=FALSE,message=FALSE,echo=FALSE}
+```{r rainfall_data,include=FALSE,warning=FALSE,message=FALSE,echo=FALSE}
 rf.dat.WY=read.csv(paste0(export.path,"/ENP_WY_RF.csv"))
 rf.dat.WY$SRA2=base::scale(rf.dat.WY$ann.RF)
 rf.dat.WY$SRA.drought2=with(rf.dat.WY,ifelse(SRA2<=-0.84,1,0))
@@ -259,7 +259,7 @@ Pm=mean(rf.dat.WY$ann.RF.wgt)
 sigma=sd(rf.dat.WY$ann.RF.wgt)
 ```
 
-```{r rainfall plot,fig.height=4,fig.width=6,echo=FALSE,fig.align="center",fig.cap="Annual total rainfall (area-weighted) and Standardized Rainfall Anomaly Index across Everglades National Park. Dashed line indicates drought threshold. "}
+```{r rainfall_plot,fig.height=4,fig.width=6,echo=FALSE,fig.align="center",fig.cap="Annual total rainfall (area-weighted) and Standardized Rainfall Anomaly Index across Everglades National Park. Dashed line indicates drought threshold. "}
 par(family="serif",mar=c(1,1.5,1,4),oma=c(3,3,0.25,0.25),mgp=c(3,1,0));
 xlim.val=c(1995,2017);by.x=5;xmaj=seq(xlim.val[1],xlim.val[2],by.x);xmin=seq(xlim.val[1],xlim.val[2],by.x/by.x)
 ylim.val=c(0.9,1.6);by.y=0.1;ymaj=seq(ylim.val[1],ylim.val[2],by.y);ymin=seq(ylim.val[1],ylim.val[2],by.y/2)
@@ -291,7 +291,7 @@ STAs.operations=data.frame(STA=c("ENR","STA-1W","STA-1E","STA-2","Comp. B","STA-
 ```
 
 
-```{r system plot,fig.height=4.5,fig.width=7,echo=FALSE,fig.align="center",fig.cap="Florida Coastal Everglades Long Term Ecological Research (FCE LTER) site proposal periods relative to southern Everglades (i.e. Water Conservation Area 3 and Southern Dade Conveyance System) water management, Stormwater Treatment Area (STA) operational periods, Tropical activity, high water events and drought conditions. Stormwater Treatment Area operational periods indicate when each facility became operational (Data Source: Chimney 2018). Hurricane or tropical storm occurrence within the vicinity (i.e. 200 km) of Everglades National Park (Data Source: https://coast.noaa.gov/hurricanes), point size indicate number of storms. Periods of high water conditions within the Everglades Ecosystem as indicated by north WCA-3A stage (and regualatory authorizations). Drought years relative to long-term annual rainfall record."}
+```{r system_plot,fig.height=4.5,fig.width=7,echo=FALSE,fig.align="center",fig.cap="Florida Coastal Everglades Long Term Ecological Research (FCE LTER) site proposal periods relative to southern Everglades (i.e. Water Conservation Area 3 and Southern Dade Conveyance System) water management, Stormwater Treatment Area (STA) operational periods, Tropical activity, high water events and drought conditions. Stormwater Treatment Area operational periods indicate when each facility became operational (Data Source: Chimney 2018). Hurricane or tropical storm occurrence within the vicinity (i.e. 200 km) of Everglades National Park (Data Source: https://coast.noaa.gov/hurricanes), point size indicate number of storms. Periods of high water conditions within the Everglades Ecosystem as indicated by north WCA-3A stage (and regualatory authorizations). Drought years relative to long-term annual rainfall record."}
 
 fce.y=6
 sta.y=4
