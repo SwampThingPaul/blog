@@ -98,7 +98,7 @@ area.sum$cum.sum.area=cumsum(area.sum$TArea)
 ```
 
 
-```{r STAarea_plot,fig.height=3.5,fig.width=6,echo=FALSE,fig.cap="Current and expected (estimated) cumulative stormwater treatment area (STA) and flow-equalization basin (FEB) coverage with the Everglades ecosystem. Actual cumulative annual areal extent of STA and FEB coverage identified by grey points. Dashed vertical line indicates to current."}
+```{r STAarea_plot,fig.height=3.5,fig.width=6,echo=FALSE}
 par(family="serif",mar=c(0.5,1.5,1,0.75),oma=c(3,3,0.25,0.25),mgp=c(3,1,0));
 xlim.val=c(1994,2026);by.x=8;xmaj=seq(xlim.val[1],xlim.val[2],by.x);xmin=seq(xlim.val[1],xlim.val[2],by.x/by.x)
 ylim.val=c(0,400);by.y=100;ymaj=seq(ylim.val[1],ylim.val[2],by.y);ymin=seq(ylim.val[1],ylim.val[2],by.y/2)
@@ -116,6 +116,7 @@ mtext(side=2,line=3.35,expression(paste("Cummulative",sep="")))
 mtext(side=2,line=2.25,"STA and FEB Area (km\u00b2 )")
 
 ```
+<center>Current and expected (estimated) cumulative stormwater treatment area (STA) and flow-equalization basin (FEB) coverage with the Everglades ecosystem. Actual cumulative annual areal extent of STA and FEB coverage identified by grey points. Dashed vertical line indicates to current.</center>
 
 ### Natural Disturbances
 
