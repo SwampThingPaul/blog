@@ -33,7 +33,7 @@ GIS.path="D:/_GISData"
 nad83.pro=CRS("+init=epsg:4269")
 utm17=CRS("+proj=utm +zone=17 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs")
 
-knitr::opts_chunk$set(fig.align = "center",cache = TRUE)
+knitr::opts_chunk$set(fig.align = "center")
 
 ```
 
