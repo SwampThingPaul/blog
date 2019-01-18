@@ -1,4 +1,4 @@
-
+#devtools::install_github("privefl/prettyjekyll")
 
 #prettyjekyll::FormatPost("_knitr/2017-06-14-old-inspiring-the-young.Rmd")
 #file.remove("_knitr/2017-06-14-old-inspiring-the-young.html")
