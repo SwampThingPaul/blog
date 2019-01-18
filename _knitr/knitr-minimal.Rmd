@@ -12,7 +12,7 @@ This is a test.
 ![Thanks GitHub for hosting my website!](../images/github-pages.jpg)
 
 
-```{r test}
+```{r test,fig.cap="Example of a plot using Rmarkdown"}
 plot(rnorm(100))
 
 ```
