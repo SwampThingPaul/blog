@@ -21,6 +21,7 @@ library(sp)
 library(sf)
 library(tmap)
 library(tmaptools)
+library(leaflet)
 
 source("D:/Commonlyusedfunctions.r")
 
@@ -127,6 +128,9 @@ Hurricanes, floods (high water) and droughts can wreak havoc on society and natu
 Using data from the National Oceanic and Atmospheric Administration ([NOAA](https://www.noaa.gov/){target="_blank"}) the occurrence of hurricanes within 200 km of ENP is frequent. This frequency of return and intensity can play a significant role in how ecosystems within the Everglades region function. 
 
 ```{r hurricane,include=FALSE,warning=FALSE,message=FALSE,echo=FALSE}
+flshoreline=readOGR(GIS.path,"FloridaShoreline")
+flshoreline=spTransform(flshoreline,utm17)
+
 hur.tck=readOGR(export.path,"hurricane_ln2")
 hur.tck=spTransform(hur.tck,utm17)
 
@@ -146,20 +150,33 @@ hurr.N.enp$N.val=with(hurr.N.enp,ifelse(is.na(N.val),0,N.val))
 #plot(N.val~WY_start,hurr.N.enp,type="l")
 
 
-
 All_Hurricanes=hur.tck
 ENP_Hurricanes_25km=hur.tck2
-map=tm_shape(enp)+tm_polygons(col="dodgerblue1",alpha=0.2)+
-  tm_shape(All_Hurricanes)+tm_lines(col="black",lty=2,lwd=1.5,alpha=0.4)+
-  tm_shape(ENP_Hurricanes_25km)+tm_lines(col="indianred2",lwd=3,alpha=0.5)+
-  tm_add_legend(type="fill",label="All Hurricanes/Tropical Storms (1851 - 2017)",col="grey")+
-  tm_add_legend(type="fill",label="Storms within 25 km of ENP (1851 - 2017)",col="indianred2")
+#map=tm_shape(enp)+tm_polygons(col="dodgerblue1",alpha=0.2)+
+#  tm_shape(All_Hurricanes)+tm_lines(col="black",lty=2,lwd=1.5,alpha=0.4)+
+#  tm_shape(ENP_Hurricanes_25km)+tm_lines(col="indianred2",lwd=3,alpha=0.5)+
+#  tm_add_legend(type="fill",label="All Hurricanes/Tropical Storms (1851 - 2017)",col="grey")+
+#  tm_add_legend(type="fill",label="Storms within 25 km of ENP (1851 - 2017)",col="indianred2")
+cols=c(rgb(190/255,232/255,255/255,1,"esri.light.blue"),rgb(151/255,219/255,242/255,1,"esri.light.blue1"),rgb(255/255,235/255,175/255,1,"esri.topaz.sand"))
+map=tm_shape(flshoreline)+tm_polygons(col=cols[3],alpha=0.75)+
+  tm_shape(All_Hurricanes)+tm_lines(col="grey",lty=1,lwd=1)+
+  tm_shape(ENP_Hurricanes_25km)+tm_lines(col="indianred2",lwd=2,alpha=0.5)+
+  tm_shape(enp)+tm_polygons(col="dodgerblue1",alpha=0.5)+
+  tm_add_legend(type="fill",label="All Storms ",col="grey")+
+  tm_add_legend(type="fill",label="Storms within\n200 km of ENP",col="indianred2")+
+  tm_compass(north=0,position=c("left","bottom"))+
+  tm_scale_bar(breaks=c(0,200),size=1,position=c("left","bottom"))+
+  tm_layout(bg.color=cols[1],legend.outside=TRUE,legend.outside.position=c("left","top"),
+            fontfamily = "serif",scale=1,asp=NA,outer.margins=c(0.005,0.01,0.005,0.01),
+            inner.margins = 0,between.margin=0,
+            legend.text.size=0.8,legend.title.size=0.8)
 
 
 ```
 
-```{r hurricane_map,echo=FALSE,out.width="75%",out.height="75%",fig.cap="Atlantic Basin Hurricane and Tropical Storm center lines."}
-tmap_leaflet(map)
+```{r hurricane_map,echo=FALSE,out.width="75%",out.height="75%",fig.cap="Atlantic Basin Hurricane and Tropical Storm center lines between 1851 and 2017."}
+#tmap_leaflet(map)
+map
 ```
 
 ```{r hurricane_freq,fig.height=3.5,fig.width=6,echo=FALSE,fig.cap="Frequency of Tropical Storms or Hurricanes that pass within 200 km of ENP. Based on Florida Water Year (May 1^st^ to Apirl 30^th^)."}
