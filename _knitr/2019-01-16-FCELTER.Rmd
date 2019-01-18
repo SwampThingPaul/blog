@@ -158,7 +158,7 @@ map=tm_shape(enp)+tm_polygons(col="dodgerblue1",alpha=0.2)+
 
 ```
 
-```{r hurricane_map,echo=FALSE,out.width="25%",fig.cap="Atlantic Basin Hurricane and Tropical Storm center lines."}
+```{r hurricane_map,echo=FALSE,out.width="75%",out.height="75%",fig.cap="Atlantic Basin Hurricane and Tropical Storm center lines."}
 tmap_leaflet(map)
 ```
 
