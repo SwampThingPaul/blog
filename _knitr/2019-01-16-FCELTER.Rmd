@@ -163,7 +163,7 @@ map=tm_shape(flshoreline)+tm_polygons(col=cols[3],alpha=0.75)+
   tm_shape(ENP_Hurricanes_25km)+tm_lines(col="indianred2",lwd=2,alpha=0.5)+
   tm_shape(enp)+tm_polygons(col="dodgerblue1",alpha=0.5)+
   tm_add_legend(type="fill",label="All Storms ",col="grey")+
-  tm_add_legend(type="fill",label="Storms within\n200 km of ENP",col="indianred2")+
+  tm_add_legend(type="fill",label="Storms within 200 km of ENP",col="indianred2")+
   tm_compass(north=0,position=c("left","bottom"))+
   tm_scale_bar(breaks=c(0,200),size=1,position=c("left","bottom"))+
   tm_layout(bg.color=cols[1],legend.outside=TRUE,legend.outside.position=c("left","top"),
@@ -174,7 +174,7 @@ map=tm_shape(flshoreline)+tm_polygons(col=cols[3],alpha=0.75)+
 
 ```
 
-```{r hurricane_map,echo=FALSE,out.width="75%",out.height="75%",fig.cap="Atlantic Basin Hurricane and Tropical Storm center lines between 1851 and 2017."}
+```{r hurricane_map,echo=FALSE,out.width="100%",out.height="100%",fig.cap="Atlantic Basin Hurricane and Tropical Storm center lines between 1851 and 2017."}
 #tmap_leaflet(map)
 map
 ```

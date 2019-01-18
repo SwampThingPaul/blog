@@ -60,8 +60,9 @@ Current and expected (estimated) cumulative stormwater treatment area (STA) and 
 <div id="hurricanes" class="section level4">
 <h4>Hurricanes</h4>
 <p>Using data from the National Oceanic and Atmospheric Administration (<a href="https://www.noaa.gov/" target="_blank">NOAA</a>) the occurrence of hurricanes within 200 km of ENP is frequent. This frequency of return and intensity can play a significant role in how ecosystems within the Everglades region function.</p>
+<pre><code>## Legend labels were too wide. The labels have been resized to 0.72. Increase legend.width (argument of tm_layout) to make the legend wider and therefore the labels larger.</code></pre>
 <div class="figure" style="text-align: center">
-<img src="{{ site.url }}{{ site.baseurl }}/knitr_files/2019-01-16-FCELTER_files/figure-html/hurricane_map-1.png" alt="Atlantic Basin Hurricane and Tropical Storm center lines between 1851 and 2017." width="75%" height="75%" />
+<img src="{{ site.url }}{{ site.baseurl }}/knitr_files/2019-01-16-FCELTER_files/figure-html/hurricane_map-1.png" alt="Atlantic Basin Hurricane and Tropical Storm center lines between 1851 and 2017." width="100%" height="100%" />
 <p class="caption">
 Atlantic Basin Hurricane and Tropical Storm center lines between 1851 and 2017.
 </p>
