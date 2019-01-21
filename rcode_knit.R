@@ -1,5 +1,14 @@
 #devtools::install_github("privefl/prettyjekyll")
 
+knit.clean=function(post.name){
+  require(prettyjekyll)
+  FormatPost(paste0("_knitr/",post.name,".Rmd"))
+  file.remove(paste0("_knitr/",post.name,".html")) 
+  unlink(paste0("_knitr/",post.name,"_files"),recursive=T)
+  return(print(paste0("formatted ", post.name, " and cleaned")))
+}
+
+
 #prettyjekyll::FormatPost("_knitr/2017-06-14-old-inspiring-the-young.Rmd")
 #file.remove("_knitr/2017-06-14-old-inspiring-the-young.html")
 
@@ -14,6 +23,7 @@
 
 #prettyjekyll::FormatPost("_knitr/knitr-minimal.Rmd")
 #file.remove("_knitr/knitr-minimal.html")
+#knit.clean("knitr-minimal");#test new function
 
 #prettyjekyll::FormatPost("_knitr/2018-12-21-sciart.Rmd")
 #file.remove("_knitr/2018-12-21-sciart.html")
@@ -28,5 +38,8 @@
 #file.remove("_knitr/2019-01-16-FCELTER.html")
 
 #prettyjekyll::FormatPost("_knitr/2019-01-20-RGeostat.Rmd")
+#file.remove("_knitr/2019-01-20-RGeostat.html") 
+#unlink("_knitr/2019-01-20-RGeostat_files",recursive=T)
+
 
 #file.create("_knitr/test.Rmd")
