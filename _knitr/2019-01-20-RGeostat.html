@@ -203,7 +203,7 @@ Soil Total Phosphorus concentration (<strong>NOT REAL DATA</strong>)
 <a class="sourceLine" id="cb10-5" data-line-number="5"><span class="co">#remove any NA&#39;s in the data</span></a>
 <a class="sourceLine" id="cb10-6" data-line-number="6">th.clp=<span class="st"> </span><span class="kw">subset</span>(th.clp,<span class="kw">is.na</span>(TP_mgkg)<span class="op">==</span>F)</a>
 <a class="sourceLine" id="cb10-7" data-line-number="7"></a>
-<a class="sourceLine" id="cb10-8" data-line-number="8"><span class="co">#extracts data frame form the spatial data</span></a>
+<a class="sourceLine" id="cb10-8" data-line-number="8"><span class="co">#extracts data frame from the spatial data</span></a>
 <a class="sourceLine" id="cb10-9" data-line-number="9">cdf.area=<span class="kw">data.frame</span>(th.clp<span class="op">@</span>data)</a>
 <a class="sourceLine" id="cb10-10" data-line-number="10"></a>
 <a class="sourceLine" id="cb10-11" data-line-number="11">Sites=<span class="kw">data.frame</span>(<span class="dt">siteID=</span>cdf.area<span class="op">$</span>Site,<span class="dt">Use=</span><span class="kw">rep</span>(<span class="ot">TRUE</span>, <span class="kw">nrow</span>(cdf.area)))</a>
@@ -264,7 +264,8 @@ Cumulative distribution function (± 95% CI) of soil total phosphorus concentrat
 Scatter plot of fake-TP data versus longitude (as meters in UTM) with prediction interval
 </p>
 </div>
-<p>Detrending the data can be done by fitting a first order model given by: <span class="math display">\[Z = a + bX + cY\]</span></p>
+<p>Detrending the data can be done by fitting a first order model to the data given by: <span class="math display">\[Z = a + bX + cY\]</span></p>
+<p>This is what it looks like in R.</p>
 <div class="sourceCode" id="cb13"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb13-1" data-line-number="1"><span class="co">#Make grid</span></a>
 <a class="sourceLine" id="cb13-2" data-line-number="2">grd=<span class="kw">as.data.frame</span>(<span class="kw">spsample</span>(sp.dat,<span class="st">&quot;regular&quot;</span>,<span class="dt">n=</span><span class="dv">12000</span>))</a>
 <a class="sourceLine" id="cb13-3" data-line-number="3"><span class="kw">names</span>(grd)       =<span class="st"> </span><span class="kw">c</span>(<span class="st">&quot;UTMX&quot;</span>, <span class="st">&quot;UTMY&quot;</span>)</a>
@@ -304,17 +305,17 @@ Scatter plot of fake-TP data versus longitude (as meters in UTM) with prediction
 Result of a first order interpolation.
 </p>
 </div>
-<p>Since the 1<sup>st</sup> order model uses least squared linear modeling, the <a href="https://www.statisticssolutions.com/assumptions-of-linear-regression/" target="_blank">assumptions of linear models</a> also applies. You can check to see if the model fits the general assumptions by <code>plot(lm.1)</code> to inspect the residual distribution. You can also use more advanced techniques such as <a href="https://cran.r-project.org/web/packages/gvlma/index.html">Global Validation of Linear Models</a> by (<a href="http://amstat.tandfonline.com/doi/abs/10.1198/016214505000000637" target="_blank">Peña and Slate 2006</a>).</p>
+<p>Since the 1<sup>st</sup> order model uses least squared linear modeling, the <a href="https://www.statisticssolutions.com/assumptions-of-linear-regression/" target="_blank">assumptions of linear models</a> also applies. You can check to see if the model fits the general assumptions by <code>plot(lm.1)</code> to inspect the residual versus fitted plot, residual distribution and others. You can also use more advanced techniques such as <a href="https://cran.r-project.org/web/packages/gvlma/index.html">Global Validation of Linear Models</a> by <a href="http://amstat.tandfonline.com/doi/abs/10.1198/016214505000000637" target="_blank">Peña and Slate (2006)</a>.</p>
 <div class="figure" style="text-align: center">
 <img src="2019-01-20-RGeostat_files/figure-html/1stOrder_diag-1.png" alt="Linear model diagonistic plots"  />
 <p class="caption">
 Linear model diagonistic plots
 </p>
 </div>
-<p>For the case of this example lets assume the model fits all assumptions of least square linear models.</p>
+<p>For this example lets assume the model fits all assumptions of least square linear models.</p>
 <p>Ultimately Kriging is a spatial analysis of data that focuses on how the data vary as the distance between sampling locations pairing increases. This is done through the construction of a <a href="https://vsp.pnnl.gov/help/vsample/Kriging_Variogram_Model.htm" target="_blank">semivariogram</a> and fitting a mathematical model to the resulting variogram. The variability (or difference) of the data between all point pairs is computed as <span class="math inline">\(\gamma\)</span> as follows:</p>
 <p><span class="math display">\[\gamma = \frac{(Z_2-Z_1)^2}{2}\]</span></p>
-<p>Comparing <span class="math inline">\(\gamma\)</span> for all point pairs and plot them versus distance between points.</p>
+<p>Lets compare <span class="math inline">\(\gamma\)</span> for all point pairs and plot them versus distance between points.</p>
 <div class="figure" style="text-align: center">
 <img src="2019-01-20-RGeostat_files/figure-html/variogram-1.png" alt="Experimental variogram plot of residual soil total phosphorus values from the 1^st^ order model."  />
 <p class="caption">
@@ -328,14 +329,14 @@ Experimental variogram plot of residual soil total phosphorus values from the 1<
 Experimental variogram plot of residual soil total phosphorus values from the 1<sup>st</sup> order model with lags interval (red hashed lines) and sample variogram estimate each lag (red point) depicted.
 </p>
 </div>
-<p>Now its time to fit a model to the sample variogram estimate. A slew of models are available in the <code>gstat</code> package. Ultimately the goal is to apply the best fitting model, this is the fine tuning I talked about earlier. Each model uses partial sill, range and nugget parameters to fit the model to the sample variogram estimate. The nugget is distance between zero and the variogram’s model intercept with the y-axis. The partial sill is the vertical distance between the nugget and the curve asymptote. Finally the range is the distance along the x-axis and the partial sill.</p>
+<p>Now its time to fit a model to the sample variogram estimate. A slew of models are available in the <code>gstat</code> package, check out the <code>vgm()</code> function. Ultimately the goal is to apply the best fitting model, this is the fine tuning I talked about earlier. Each model uses partial sill, range and nugget parameters to fit the model to the sample variogram estimate. The nugget is distance between zero and the variogram’s model intercept with the y-axis. The partial sill is the vertical distance between the nugget and the curve asymptote. Finally the range is the distance along the x-axis and the partial sill.</p>
 <div class="figure" style="text-align: center">
 <img src="2019-01-20-RGeostat_files/figure-html/model-explained-1.png" alt="Example of an ideal variogram with fit model depicting the range, sill and nugget parameters in a variogram model (Source Gimond 2018)."  />
 <p class="caption">
 Example of an ideal variogram with fit model depicting the range, sill and nugget parameters in a variogram model (Source Gimond 2018).
 </p>
 </div>
-<p>In the hypothetical soil total phosphorus (TP) spatial model, the semivariogram is less than ideal. Here I fit a linear model and set the range to zero give the linear nature to the data. You see how this variogram differs from the example above where the model (red line) doesn’t fit the data (blue points). This where the “rubber meet the road” with Kriging and model fitting it critical to produce a strong spatial model. Additional information regarding the spatial structure of the dataset can be gleaned from the sample variogram estimate. Maybe we will save that for another time?</p>
+<p>In the hypothetical soil total phosphorus (TP) spatial model, the semivariogram is less than ideal. Here I fit a linear model and set the range to zero give the linear nature to the data. You see how this variogram differs from the example above where the model (red line) doesn’t fit the data (blue points) very well. This is where the <em>“rubber meet the road”</em> with Kriging and model fitting to produce a strong spatial model. Additional information regarding the spatial structure of the dataset can be gleaned from the sample variogram estimate. Maybe we will save that for another time?</p>
 <div class="sourceCode" id="cb14"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb14-1" data-line-number="1"><span class="co">#sampled variogram estimate</span></a>
 <a class="sourceLine" id="cb14-2" data-line-number="2">var.smpl  =<span class="st"> </span><span class="kw">variogram</span>(res <span class="op">~</span><span class="st"> </span><span class="dv">1</span>, sp.dat, <span class="dt">cloud =</span> F)</a>
 <a class="sourceLine" id="cb14-3" data-line-number="3"></a>
@@ -423,7 +424,7 @@ Final kriged interpolation of the detrended (fake) soil total phosphorus values 
 Variance map of final kriged interpolation of the detrended (fake) soil total phosphorus values across the study area.
 </p>
 </div>
-<p>With units in area units, the variance map is less easily interpreted other than high-versus-low. A more readily interpretable map is the 95% confidence interval map which can be calculated from the variance data stored in <code>dat.krg</code>.</p>
+<p>With units in area units, the variance map is less easily interpreted other than high-versus-low. A more readily interpretable map is the 95% confidence interval map which can be calculated from the variance data stored in <code>dat.krg</code>. Both maps provide an estimate of uncertainty in the spatial distribution of the data.</p>
 <div class="sourceCode" id="cb18"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb18-1" data-line-number="1">r.ci   &lt;-<span class="st"> </span><span class="kw">sqrt</span>(<span class="kw">raster</span>(dat.krg, <span class="dt">layer=</span><span class="st">&quot;var1.var&quot;</span>)) <span class="op">*</span><span class="st"> </span><span class="fl">1.96</span></a>
 <a class="sourceLine" id="cb18-2" data-line-number="2">r.m.ci &lt;-<span class="st"> </span><span class="kw">mask</span>(r.ci, study.area)</a>
 <a class="sourceLine" id="cb18-3" data-line-number="3"></a>

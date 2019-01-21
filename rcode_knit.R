@@ -27,4 +27,6 @@
 #prettyjekyll::FormatPost("_knitr/2019-01-16-FCELTER.Rmd")
 #file.remove("_knitr/2019-01-16-FCELTER.html")
 
+#prettyjekyll::FormatPost("_knitr/2019-01-20-RGeostat.Rmd")
+
 #file.create("_knitr/test.Rmd")

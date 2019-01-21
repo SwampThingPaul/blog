@@ -197,7 +197,7 @@ th.clp$area_sqkm=rgeos::gArea(th.clp,byid=T)*1e-6
 #remove any NA's in the data
 th.clp= subset(th.clp,is.na(TP_mgkg)==F)
 
-#extracts data frame form the spatial data
+#extracts data frame from the spatial data
 cdf.area=data.frame(th.clp@data)
 
 Sites=data.frame(siteID=cdf.area$Site,Use=rep(TRUE, nrow(cdf.area)))
@@ -302,10 +302,11 @@ mtext(side=1,line=2,"Soil Total Phosphorus Concentration (mg kg\u207B\u00B9)")
 ```
 
 
-Detrending the data can be done by fitting a first order model given by: 
+Detrending the data can be done by fitting a first order model to the data given by: 
 $$Z = a + bX + cY$$
 
 
+This is what it looks like in R. 
 
 ```{r 1stOrder, results='hide', fig.cap="Result of a first order interpolation.", fig.align='center'}
 
@@ -345,21 +346,21 @@ tm_shape(r.m.dat.1st) +
 
 ```
 
-Since the 1^st^ order model uses least squared linear modeling, the [assumptions of linear models](https://www.statisticssolutions.com/assumptions-of-linear-regression/){target="_blank"} also applies. You can check to see if the model fits the general assumptions by `plot(lm.1)` to inspect the residual distribution. You can also use more advanced techniques such as [Global Validation of Linear Models](https://cran.r-project.org/web/packages/gvlma/index.html) by
-([Peña and Slate 2006](http://amstat.tandfonline.com/doi/abs/10.1198/016214505000000637){target="_blank"}).
+Since the 1^st^ order model uses least squared linear modeling, the [assumptions of linear models](https://www.statisticssolutions.com/assumptions-of-linear-regression/){target="_blank"} also applies. You can check to see if the model fits the general assumptions by `plot(lm.1)` to inspect the residual versus fitted plot, residual distribution and others. You can also use more advanced techniques such as [Global Validation of Linear Models](https://cran.r-project.org/web/packages/gvlma/index.html) by
+[Peña and Slate (2006)](http://amstat.tandfonline.com/doi/abs/10.1198/016214505000000637){target="_blank"}.
 
 ```{r 1stOrder_diag, echo=FALSE, message=FALSE, results='hide', fig.cap="Linear model diagonistic plots", fig.align='center'}
 layout(matrix(c(1:4),2,2,byrow=T));plot(lm.1)
 
 ```
 
-For the case of this example lets assume the model fits all assumptions of least square linear models. 
+For this example lets assume the model fits all assumptions of least square linear models. 
 
 Ultimately Kriging is a spatial analysis of data that focuses on how the data vary as the distance between sampling locations pairing increases. This is done through the construction of a [semivariogram](https://vsp.pnnl.gov/help/vsample/Kriging_Variogram_Model.htm){target="_blank"} and fitting a mathematical model to the resulting variogram. The variability (or difference) of the data between all point pairs is computed as $\gamma$ as follows:
 
 $$\gamma = \frac{(Z_2-Z_1)^2}{2}$$
 
-Comparing $\gamma$ for all point pairs and plot them versus distance between points. 
+Lets compare $\gamma$ for all point pairs and plot them versus distance between points. 
 
 ```{r variogram, echo=FALSE,results='hide',fig.height=4,fig.width=6.0,fig.align="center", fig.cap="Experimental variogram plot of residual soil total phosphorus values from the 1^st^ order model."}
 var.cld  = as.data.frame(variogram(res ~ 1, sp.dat, cloud = TRUE))
@@ -412,7 +413,7 @@ mtext(side=1,line=2,"Distance between point pairs (km)")
 
 ```
 
-Now its time to fit a model to the sample variogram estimate. A slew of models are available in the `gstat` package. Ultimately the goal is to apply the best fitting model, this is the fine tuning I talked about earlier. Each model uses partial sill, range and nugget parameters to fit the model to the sample variogram estimate. The nugget is distance between zero and the variogram's model intercept with the y-axis. The partial sill is the vertical distance between the nugget and the curve asymptote. Finally the range is the distance along the x-axis and the partial sill.   
+Now its time to fit a model to the sample variogram estimate. A slew of models are available in the `gstat` package, check out the `vgm()` function. Ultimately the goal is to apply the best fitting model, this is the fine tuning I talked about earlier. Each model uses partial sill, range and nugget parameters to fit the model to the sample variogram estimate. The nugget is distance between zero and the variogram's model intercept with the y-axis. The partial sill is the vertical distance between the nugget and the curve asymptote. Finally the range is the distance along the x-axis and the partial sill.   
 
 ```{r model-explained, echo=FALSE, fig.height=3.5,fig.height=4, results='hide', fig.align="center", fig.cap="Example of an ideal variogram with fit model depicting the range, sill and nugget parameters in a variogram model (Source Gimond 2018)."}
 
@@ -443,7 +444,7 @@ plot(v, v.fit, pch = 16,col="grey", panel = function(x,y,subscripts,...) {
 )
 ```
 
-In the hypothetical soil total phosphorus (TP) spatial model, the semivariogram is less than ideal. Here I fit a linear model and set the range to zero give the linear nature to the data. You see how this variogram differs from the example above where the model (red line) doesn't fit the data (blue points). This where the "rubber meet the road" with Kriging and model fitting it critical to produce a strong spatial model. Additional information regarding the spatial structure of the dataset can be gleaned from the sample variogram estimate. Maybe we will save that for another time?
+In the hypothetical soil total phosphorus (TP) spatial model, the semivariogram is less than ideal. Here I fit a linear model and set the range to zero give the linear nature to the data. You see how this variogram differs from the example above where the model (red line) doesn't fit the data (blue points) very well. This is where the *"rubber meet the road"* with Kriging and model fitting to produce a strong spatial model. Additional information regarding the spatial structure of the dataset can be gleaned from the sample variogram estimate. Maybe we will save that for another time?
 
 ```{r var_model, results='hide'}
 #sampled variogram estimate
@@ -553,7 +554,7 @@ tm_shape(var.r.m) +
 
 ```
 
-With units in area units, the variance map is less easily interpreted other than high-versus-low. A more readily interpretable map is the 95% confidence interval map which can be calculated from the variance data stored in `dat.krg`. 
+With units in area units, the variance map is less easily interpreted other than high-versus-low. A more readily interpretable map is the 95% confidence interval map which can be calculated from the variance data stored in `dat.krg`. Both maps provide an estimate of uncertainty in the spatial distribution of the data. 
 
 ```{r data_krig_CI, results='hide', fig.align='center', fig.cap="95% Confidence Interval map of final kriged interpolation of the detrended (fake) soil total phosphorus values across the study area."}
 
