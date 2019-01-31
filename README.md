@@ -1,6 +1,9 @@
-This repository is for my blog to accompany my professional [webpage](swampthingpaul.github.io).
+Actual blog [webpage](https://swampthingpaul.github.io/blog/) 
+
+This repository is for my blog to accompany my professional [webpage](https://swampthingpaul.github.io).
 
 If you have any questions feel free to [contact me](mailto:pjulian@ufl.edu).
+
 
 ***
 Info
