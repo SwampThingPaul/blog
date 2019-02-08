@@ -33,6 +33,7 @@ knit.clean=function(post.name){
 
 #prettyjekyll::FormatPost("_knitr/2019-01-04-NewYearOldMe.Rmd")
 #file.remove("_knitr/2019-01-04-NewYearOldMe.html")
+#knit.clean("2019-01-04-NewYearOldMe")
 
 #prettyjekyll::FormatPost("_knitr/2019-01-16-FCELTER.Rmd")
 #file.remove("_knitr/2019-01-16-FCELTER.html")
