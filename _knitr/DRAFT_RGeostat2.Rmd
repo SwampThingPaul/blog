@@ -11,18 +11,269 @@ editor_options:
 
 __Keywords:__ geostatistics, R, soil science
 
+***
+
+Continuing our series on geospatial analysis we are doing to dive into spatial statistics expanding analyses of spatial patterns. In my [prior post](https://swampthingpaul.github.io/blog/geospatial-data-analysis-in-rstats.-part-1/){target="_blank"} I presented spatial interpolation including kriging. Just like in the last post I will be using [tmap](https://swampthingpaul.github.io/blog/mapping-in-rstats/){target="_blank"} to display our geospatial data. Also like in the last post I will be using a "fake" dataset from real stations with a randomly generated imposed spatial gradient for demonstration purposes. 
+
+First lets load the necessary R-packages/libraries. 
+```{r libraries,echo=T,message=F,warning=F}
+# Libraries
+library(sp)
+library(rgdal)
+library(rgeos)
+library(maptools)
+library(raster)
+library(tmap)
+library(tmaptools)
+
+library(spdep)
+library(spatstat)
+
+```
+
+```{r data, include=F}
+set.seed(1)
+uf.cols.muted=c(rgb(108/255,154/255,195/255,1,"gator.blue"),rgb(226/255,143/255,65/255,1,"gator.orange"));#office style colors from UF
+source("D:/commonlyusedfunctions.r")
+wd="D:/UF/TaylorSlough/UTS_Soil"
+
+gis.path=paste0(wd,"/GIS_Data")
+
+#data
+loc.dat1=readOGR(paste(gis.path,"/Saptial_Trans_2012Sampling",sep=""),"Sample_Sites_fromTZOdata_pro")
+attributes(loc.dat1)$proj4string
+
+loc.dat.raw=loc.dat1@data[,c("UTMX","UTMY")]
+
+sp.mod.dat=exp(7.668e-5*loc.dat1@data$UTMY+(-2.099e2))
+sp.mod.dat=sp.mod.dat*runif(length(sp.mod.dat),1.2,2.0)
+loc.dat1@data$TP_mgkg=sp.mod.dat;#fake data with a spatial gradient
+#write.csv(loc.dat1@data,"D:/_GitHub/blog/images/20190130_Geospatial/loc_dat.csv",row.names=F)
+
+grid=readOGR(paste(gis.path,"/StudyArea_Grid",sep=""),"StudyArea_grid")
+attributes(grid)$proj4string
+study.area=gUnaryUnion(grid)
+
+fp=readOGR(paste(gis.path,"/StudyArea_Grid",sep=""),"South_DDetention_clip")
+ts=readOGR(paste(gis.path,"/StudyArea_Grid",sep=""),"Slough_StudyArea")
+road=readOGR(gis.path,"roads_Clipped")
+canal=readOGR(gis.path,"sfwmd_canals")
+
+sp.dat=loc.dat1
+#plot(TP_mgkg~UTMY,sp.dat@data)
+
+```
+
+Here is our data from the [prior post](https://swampthingpaul.github.io/blog/geospatial-data-analysis-in-rstats.-part-1/){target="_blank"}...remember? 
+
+```{r quick plot,fig.height=4,fig.width=5,echo=FALSE,fig.align="center"}
+par(family="serif",mar=c(1,1,1,1),oma=c(0.5,0.5,0.5,0.5));
+plot(sp.dat, pch=21)
+box()
+```
+
+...and for my final trick we will use some data from the United States Environmental Protection Agency from their [Regional Environmental Monitoring and Assessment Program](https://www.epa.gov/everglades/environmental-monitoring-everglades){target="blank"}.  
+
+## Average Nearest-Neighbor 
+
+An average nearest neighbor (ANN) analysis measures the average distance from each point in the study area to its nearest point. Average nearest neighbor is exactly what is says it is the average distance between points (or neighbors) the ultimate analysis involves determining a matrix of distances between points. When plotting ANN as a function of neighbor order it provides some insight into the spatial structure of the data (Gimond 2018). 
+
+```{r f11-diff-patterns, fig.cap="Three different point patterns: a single cluster, a dual cluster and a randomly scattered pattern.", fig.height=2.25, fig.width=4.5, echo=FALSE,fig.align="center"}
+win = owin(c(0,10),c(0,10))
+
+set.seed(12)
+x = rnorm(20, 5,0.3)
+set.seed(14)
+y = rnorm(20,5,0.3)
+P.cl = ppp(x,y,window=win)
+
+set.seed(6)
+x = c(rnorm(10, 3,0.5), rnorm(10,6,0.5))
+set.seed(34)
+y = c(rnorm(10, 3,0.5), rnorm(10,6,0.5))
+P.cl2 = ppp(x,y,window=win)
+
+set.seed(673)
+P.rnd = rpoint(20, win=win)
+
+ann.cl = apply(nndist(P.cl, k=1:(P.cl$n-1)),2,FUN=mean)
+ann.cl2 = apply(nndist(P.cl2, k=1:(P.cl2$n-1)),2,FUN=mean)
+ann.rnd = apply(nndist(P.rnd, k=1:(P.rnd$n-1)),2,FUN=mean)
+
+par(family="serif",mar=c(0.5,0.5,0.5,0.5),oma=rep(0,4));
+layout(matrix(c(1:3),1,3,byrow=T))
+ plot(y~x,P.cl, pch=21,bg="grey", main="",ylim=c(0,10),xlim=c(0,10),yaxt="n",xaxt="n",ylab=NA,xlab=NA,type="n")
+ with(P.cl,points(x,y,pch=21,bg="grey",lwd=0.05,cex=1.5))
+ 
+ plot(y~x,P.cl, pch=21,bg="grey", main="",ylim=c(0,10),xlim=c(0,10),yaxt="n",xaxt="n",ylab=NA,xlab=NA,type="n")
+ with(P.cl2,points(x,y,pch=21,bg="dodgerblue1",lwd=0.05,cex=1.5))
+ 
+ plot(y~x,P.cl, pch=21,bg="grey", main="",ylim=c(0,10),xlim=c(0,10),yaxt="n",xaxt="n",ylab=NA,xlab=NA,type="n")
+ with(P.rnd,points(x,y,pch=21,bg="indianred1",lwd=0.05,cex=1.5))
+
+```
+
+```{r f11-diff-ANN-plots, fig.cap="Three different ANN vs. neighbor order plots. The black ANN line is for the first point pattern (single cluster); the blue line is for the second point pattern (double cluster) and the red line is for the third point pattern.", fig.height=3, fig.width=5, fig.align="center",echo=FALSE}
+ylim.val=c(0, 10);by.y=2;ymaj=seq(ylim.val[1],ylim.val[2],by.y);ymin=seq(ylim.val[1],ylim.val[2],by.y/2)
+xlim.val=c(0,20);by.x=5;xmaj=seq(xlim.val[1],xlim.val[2],by.x);xmin=seq(xlim.val[1],xlim.val[2],by.x/by.x)
+
+par(family="serif",mar=c(1.5,2,1,0.5),oma=c(2,2,0.25,0.5));
+plot(1:19, ann.cl, type="n", ylim=ylim.val,xlim=xlim.val,xaxt="n",yaxt="n",xlab=NA, ylab=NA)
+abline(h=ymaj,v=xmaj,lty=3,col="grey")
+pt_line(1:19,ann.cl,1,"grey",1,21,"grey")
+pt_line(1:19,ann.cl2,1,"dodgerblue1",1,21,"dodgerblue1")
+pt_line(1:19,ann.rnd,1,"indianred1",1,21,"indianred1")
+axis_fun(1,xmaj,xmin,xmaj,1)
+axis_fun(2,ymaj,ymin,ymaj,1)
+mtext(side=1,line=2,"Neighbor order")
+mtext(side=2,line=2, "ANN")
+```
+
+As you can see the more clustered the points the consistent the distance between neighbors. As points become more dispersed, the distances vary from neighbor-to-neighbor, the abrupt change in ANN observed in the clustered points is an indicator of groups/clusters of points and the gradual increase in ANN indicates more-or-less random distribution of points.  
+
+What does the ANN network look like for our data? Remember our thessian polygon of the monitoring network from the last [post](https://swampthingpaul.github.io/blog/geospatial-data-analysis-in-rstats.-part-1/){target="_blank"}? 
+
+```{r Thessian-plots, fig.cap="Thessian polygons clipped to study area.", fig.height=4, fig.width=6, fig.align="center",echo=FALSE,message=F,warning=F}
+par(family="serif",mar=c(0.5,0.5,0.5,0.5),oma=rep(0,4));
+th.dat=thessian_create.v2(sp.dat,study.area)
+```
+
+```{r ANN,fig.height=4, fig.width=6,fig.align="center",fig.cap="Thessian polygons clipped to the study area with neighborhood network."}
+#th.dat is the thessian polygons above. 
+w=poly2nb(th.dat, row.names=th.dat$Site);#construct the neighbours list.
+
+par(mar=rep(0.5,4),oma=rep(0,4));
+plot(th.dat)
+plot(w,coordinates(th.dat), col='red', lwd=0.5,add=T)
+```
+
+The `poly2nb()` function builds a neighbors list based on regions with a contiguous boundary that is sharing one or more boundary point. However, this same function can be completed for points as well. Much like the `poly2nb()` function builds the neighbors list, the `knearneigh()` function also builds a list using a specified number of neighbors to consider (i.e k). As k increases (i.e. data points), more neighbors are considered and thereby influencing the  estimated mean distance between nearest neighbors. As a demonstration here is what the network looks like with only six neighbors considered. 
+
+```{r ANN-points,fig.height=4, fig.width=6,fig.align="center",fig.cap="Thessian polygons clipped to the study area with neighborhood network."}
+#th.dat is the thessian polygons above. 
+
+w2=knn2nb(knearneigh(sp.dat,k=6))
+w2=nb2listw(w2)
+
+par(mar=rep(0.5,4),oma=rep(0,4));
+plot(w2,coordinates(sp.dat),col="red")
+plot(study.area,add=T)
+```
+
+As you can see the point-based ANN with only six neighbors considered results in a different network. But what affect does the k number have on ANN?  
+
+```{r ANN-point2,fig.height=3, fig.width=5, fig.align="center",fig.cap="Average Nearest Neighbour as a function of neighbor included.", echo=1}
+ANN=apply(nndist(as(sp.dat,"ppp"), k=1:202),2,FUN=mean)
+
+ylim.val=c(0,8000);by.y=2000;ymaj=seq(ylim.val[1],ylim.val[2],by.y);ymin=seq(ylim.val[1],ylim.val[2],by.y/2)
+xlim.val=c(0,202);by.x=20;xmaj=seq(xlim.val[1],xlim.val[2],by.x);xmin=seq(xlim.val[1],xlim.val[2],by.x/2)
+par(family="serif",mar=c(1.5,2,1,0.5),oma=c(1.5,2,0.25,0.5));
+plot(ANN ~ eval(1:202),type="n", ylim=ylim.val,xlim=xlim.val,xaxt="n",yaxt="n",xlab=NA, ylab=NA)
+abline(h=ymaj,v=xmaj,lty=3,col="grey")
+lines(1:202,ANN,col="forestgreen",lwd=3)
+axis_fun(1,xmaj,xmin,xmaj,1)
+axis_fun(2,ymaj,ymin,ymaj,1)
+mtext(side=1,line=2,"Neighbors Included")
+mtext(side=2,line=2.75, "Average Nearest Neighbour (m)")
+```
+
+Selection of a K value can also be corrected for various edge corrections, some of you may be heard of *Ripley's K*-function (Ripley 1977). For purposes of th is post we will not delve into this aspect of spatial analysis however if your intrested and eager to learn Gimond (2018) introduces some of these concepts in detail.
+
+For purposes of this post we are going with a very simple neighbor list (i.e. `w` variable above) using the thessian polygons to estimate a spatial weight within the network. This neighbor list comes into play in a little bit. Maybe we can dig into the *Ripley's K*-function in a future post.     
+ 
 ## Spatial Autocorrelation
 
 Most if not all field data can be characterized as spatial data, especially in ecology. If something is sampled at a particular location there is a spatial component to the data. As such there are some spatial specific statistics that be applied to spatial data to explain how the data relates to the world. One such statistic is spatial autocorrelation. 
 
 Spatial autocorrelation measures the degree to which a phenomenon of interest is correlated to itself in space. This statistical analysis evaluates whether the observed value of a variable at one location is independent of values of that variability at neighboring locations.
 
-* Positive spatial autocorrelation indiates similar values appear close to each other (i.e. clustered in space).
+* Positive spatial autocorrelation indicates similar values appear close to each other (i.e. clustered in space).
 
 * Negative spatial autocorrelation indicates that neighboring values are dissimilar (i.e. dispersed in space).
 
 * No spatial autocorrelation indicates that the spatial pattern is completely random.
 
-*Moran's I* is the most common spatial autocorrelation test however other tests are availalbe (i.e. [Geary's C](https://en.wikipedia.org/wiki/Geary%27s_C){target="_blank"}, [Join-Count](https://mltconsecol.github.io/TU_LandscapeAnalysis_Documents/Assignments_web/Assignment06_Autocorrelation.pdf){target="_blank"}, etc.) each have a specific application much like the different correlation analyses (i.e. Pearson's, Spearman, Kendall, etc.). Moreover the spatial autocorrelation analysis of spatial data is realtively straigh forward. 
-                                                                                                                                                                                                                                                                                                                                                                                                                
-                                                                                                                                                                                                                                                                                                                                                                                                                
+Moran's *I* is the most common spatial autocorrelation test however other tests are available (i.e. [Geary's C](https://en.wikipedia.org/wiki/Geary%27s_C){target="_blank"}, [Join-Count](https://mltconsecol.github.io/TU_LandscapeAnalysis_Documents/Assignments_web/Assignment06_Autocorrelation.pdf){target="_blank"}, etc.) each have a specific application much like the different correlation analyses (i.e. Pearson's, Spearman, Kendall, etc.). Moreover the spatial autocorrelation analysis of spatial data is relatively straight forward. 
+
+Spatial analyses can be expressed in a *"Global"* or *"Local"* context. Spatial autocorrelation is no different. Global spatial analysis evaluates the data across the entire dataset (i.e. study area) and assumes homogeneity across the dataset. If the data is spatially heterogeneous or also referred to as  inhomogeneous local analyses can be applied. For instance if no global spatial autocorrelation is detected autocorrelation can be tested at the local (i.e. individual spatial units). Moran's *I* uses local indicators of spatial association to evaluate data at the local and global levels where the global analysis is the sum of local *I* values.
+
+[Gimond (2018)](https://mgimond.github.io/Spatial/point-pattern-analysis-in-r.html){target="_blank"} and [Baddeley (2008)](https://training.fws.gov/courses/references/tutorials/geospatial/CSP7304/documents/PointPatterTutorial.pdf){target="_blank"} provides an excellent step-by-step tutorial on point pattern analysis, the basis of spatial homogeneity. I highly recommend taking a look!! 
+
+Moran's I can be calculated long-hand or using the `spdep` r-package.
+
+Local Moran's *I* spatial autocorrelation statistic ($I_i$), also sometimes referred to as Anselin Local Moran's *I* (Anselin 1995) and is calculated by:  
+
+$$ I_{i} = \frac{n}{\sum_{i=1}^n (y_i - \bar{y})^2} \times \frac{\sum_{i=1}^n \sum_{j=1}^n w_{ij}(y_i - \bar{y})(y_j - \bar{y})}{\sum_{i=1}^n \sum_{j=1}^n w_{ij}} $$
+Where $y_{i}$ is the attribute feature (i.e. soil total phosphorus in our case), $\bar{y}$ is the arithmetic mean across the entire study area/spatial unit, $w_{ij}$ is the spatial weight between $i$ and $j$ and $n$ is the total number of features. 
+
+As alluded  to early in addition to a local statistic we also have a Global metric. Global Moran's *I* is merely the sum of the local values divided by the total number of features ($n$)
+
+$$I = \sum_{i=1} \frac{I_{i}}{n} $$
+
+As introduced above, if the Moran's I statistic is positive indicates that a feature has neighboring features with similarly high or low attribute values; this feature is part of a cluster at the local level. Alternatively if the Moran's I statistic is negative it indicates that a feature has neighboring features with dissimilar values.Moran's I statistic is a relative metric and therefore a $z$score and $\rho$-value can also be calculated to determine statistical significance. 
+
+Enough talk, lets jump into `R`!! 
+<center>
+![](https://media.giphy.com/media/3E1yVKeqS9JGcHLm0O/200w_d.gif)
+</center>
+
+Calculating Moran's I statistic by hand. Code adapted from [rspatial.org](https://rspatial.org/analysis/3-spauto.html){target="_blank"}.
+```{r moranI code}
+wm=nb2mat(w, style='B');#spatial weights matrix
+
+n=length(th.dat$TP_mgkg);# total number of features
+y=th.dat$TP_mgkg;# attribute feature
+ybar=mean(th.dat$TP_mgkg);# mean attribute feature across project area
+dy=y - ybar;# residual value
+
+yi=rep(dy, each=n);# a list of yi
+yj=rep(dy);# a list of yj
+yiyj= yi * yj;# cross product of yi and yj
+
+pm=matrix(yiyj,ncol=n);# a matrix of cross products
+pmw=pm * wm;# cross products with spatial weights (w value from above)
+           # set to zero the value for the pairs that are not adjacent
+
+spmw=sum(pmw,na.rm=T);# 
+smw=sum(wm); #Sum of spatial weights
+sw=spmw / smw
+
+var=n / sum(dy^2);# variance in y
+
+MI=var * sw;# Moran's I 
+MI
+
+```
+
+Now remember the calculated Moran's I value of `r round(MI,3)` as we are going to now use the functions in the `spdep` package to calculate this value and test for significance. 
+
+First we need to prep the spatial weights, this time in the form of a list rather than a matrix.
+
+```{r}
+ww <-  nb2listw(w, style='B');# puts w in a list rather than a matrix
+ww
+```
+
+Now we can use the `moran()` function in the `spdep` package. In this function we plug in the data, number of features (i.e. n) and the global spatial weights $S_0$ (`smw` variable in the long hand example above).
+
+```{r}
+MI2=moran(th.dat$TP_mgkg, ww, n=length(ww$neighbours), S0=Szero(ww))
+MI2
+```
+
+The `moran` function provides the Moran's I value (looks similar to the long hand version right?) and the sample kurtosis (K, not to be confused with the K discussed with ANN). Alright so now we need to determine if the value is statistically significant. We can go about this in two ways. The first is a parametric evaluation of statistical significance the other is a Monte Carlo simulation. The Monte Carlo approach evlauated the observed value of Moran’s I  compared with a simulated distribution to see how likely it is that the observed values could be considered a random draw. Let walk through both shall we. 
+
+
+
+## References
+
+* Anselin L (1995) Local Indicators of Spatial Association—LISA. Geographical Analysis 27:93–115.
+
+* Baddeley A (2008) Analysing spatial point patterns in R. CSIRO. 171.
+
+* Gimond M (2018) Intro to GIS and Spatial Analysis.
+
+* Ripley BD (1977) Modelling Spatial Patterns. Journal of the Royal Statistical Society: Series B (Methodological) 39:172–192.
+
+
+***
