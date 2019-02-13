@@ -1,6 +1,6 @@
 ---
 title: "Geospatial data analysis in #rstats. Part 2"
-date: " "
+date: "February 12, 2019"
 output: 
   prettydoc::html_pretty:
   theme: default
@@ -13,7 +13,7 @@ __Keywords:__ geostatistics, R, soil science
 
 ***
 
-Continuing our series on geospatial analysis we are doing to dive into spatial statistics expanding analyses of spatial patterns. In my [prior post](https://swampthingpaul.github.io/blog/geospatial-data-analysis-in-rstats.-part-1/){target="_blank"} I presented spatial interpolation including kriging. Just like in the last post I will be using [tmap](https://swampthingpaul.github.io/blog/mapping-in-rstats/){target="_blank"} to display our geospatial data. Also like in the last post I will be using a "fake" dataset from real stations with a randomly generated imposed spatial gradient for demonstration purposes. 
+Continuing our series on geospatial analysis we are doing to dive into spatial statistics expanding analyses of spatial patterns. In my [prior post](https://swampthingpaul.github.io/blog/geospatial-data-analysis-in-rstats.-part-1/){target="_blank"} I presented spatial interpolation techniques including kriging. Just like in the last post I will be using [tmap](https://swampthingpaul.github.io/blog/mapping-in-rstats/){target="_blank"} to display our geospatial data. Also like in the last post I will be using a "fake" dataset from real stations with a randomly generated imposed spatial gradient for demonstration purposes. 
 
 First lets load the necessary R-packages/libraries. 
 ```{r libraries,echo=T,message=F,warning=F}
@@ -23,12 +23,10 @@ library(rgdal)
 library(rgeos)
 library(maptools)
 library(raster)
-library(tmap)
-library(tmaptools)
-
 library(spdep)
 library(spatstat)
-
+library(tmap)
+library(tmaptools)
 ```
 
 ```{r data, include=F}
@@ -72,13 +70,13 @@ plot(sp.dat, pch=21)
 box()
 ```
 
-...and for my final trick we will use some data from the United States Environmental Protection Agency from their [Regional Environmental Monitoring and Assessment Program](https://www.epa.gov/everglades/environmental-monitoring-everglades){target="blank"}.  
-
 ## Average Nearest-Neighbor 
 
-An average nearest neighbor (ANN) analysis measures the average distance from each point in the study area to its nearest point. Average nearest neighbor is exactly what is says it is the average distance between points (or neighbors) the ultimate analysis involves determining a matrix of distances between points. When plotting ANN as a function of neighbor order it provides some insight into the spatial structure of the data (Gimond 2018). 
+An average nearest neighbor (ANN) analysis measures the average distance from each point in the study area to its nearest point. Average nearest neighbor is exactly what is says it is, the average distance between points (or neighbors) the ultimate analysis involves determining a matrix of distances between points. When plotting ANN as a function of neighbor order it provides some insight into the spatial structure of the data (Gimond 2018). 
 
-```{r f11-diff-patterns, fig.cap="Three different point patterns: a single cluster, a dual cluster and a randomly scattered pattern.", fig.height=2.25, fig.width=4.5, echo=FALSE,fig.align="center"}
+Here we have three examples a single cluster, dual cluster and a randomly scattering of points.
+
+```{r f11-diff-patterns, fig.cap="Three different point patterns: a single cluster (left), a dual cluster (center) and a randomly scattered pattern (right).", fig.height=2.25, fig.width=4.5, echo=FALSE,fig.align="center"}
 win = owin(c(0,10),c(0,10))
 
 set.seed(12)
@@ -147,7 +145,7 @@ plot(th.dat)
 plot(w,coordinates(th.dat), col='red', lwd=0.5,add=T)
 ```
 
-The `poly2nb()` function builds a neighbors list based on regions with a contiguous boundary that is sharing one or more boundary point. However, this same function can be completed for points as well. Much like the `poly2nb()` function builds the neighbors list, the `knearneigh()` function also builds a list using a specified number of neighbors to consider (i.e k). As k increases (i.e. data points), more neighbors are considered and thereby influencing the  estimated mean distance between nearest neighbors. As a demonstration here is what the network looks like with only six neighbors considered. 
+The `poly2nb()` function builds a neighbors list based on regions with a contiguous boundary that is sharing one or more boundary point. However, this same concept can be applied for points as well. Much like the `poly2nb()` function builds the neighbors list, the `knearneigh()` function also builds a list using a specified number of neighbors to consider (i.e k). As k increases (i.e. data points), more neighbors are considered and thereby influencing the  estimated mean distance between nearest neighbors. As a demonstration here is what the network looks like with only six neighbors considered. 
 
 ```{r ANN-points,fig.height=4, fig.width=6,fig.align="center",fig.cap="Thessian polygons clipped to the study area with neighborhood network."}
 #th.dat is the thessian polygons above. 
@@ -177,7 +175,7 @@ mtext(side=1,line=2,"Neighbors Included")
 mtext(side=2,line=2.75, "Average Nearest Neighbour (m)")
 ```
 
-Selection of a K value can also be corrected for various edge corrections, some of you may be heard of *Ripley's K*-function (Ripley 1977). For purposes of th is post we will not delve into this aspect of spatial analysis however if your intrested and eager to learn Gimond (2018) introduces some of these concepts in detail.
+Selection of a K value can also be corrected for various edge corrections, some of you may be heard of *Ripley's K*-function (Ripley 1977). For purposes of this post we will not delve into this aspect of spatial analysis however if your interested and eager to learn Gimond (2018) introduces some of these concepts in detail.
 
 For purposes of this post we are going with a very simple neighbor list (i.e. `w` variable above) using the thessian polygons to estimate a spatial weight within the network. This neighbor list comes into play in a little bit. Maybe we can dig into the *Ripley's K*-function in a future post.     
  
@@ -199,7 +197,7 @@ Spatial analyses can be expressed in a *"Global"* or *"Local"* context. Spatial 
 
 [Gimond (2018)](https://mgimond.github.io/Spatial/point-pattern-analysis-in-r.html){target="_blank"} and [Baddeley (2008)](https://training.fws.gov/courses/references/tutorials/geospatial/CSP7304/documents/PointPatterTutorial.pdf){target="_blank"} provides an excellent step-by-step tutorial on point pattern analysis, the basis of spatial homogeneity. I highly recommend taking a look!! 
 
-Moran's I can be calculated long-hand or using the `spdep` r-package.
+Moran's *I* can be calculated long-hand or using the `spdep` r-package.
 
 Local Moran's *I* spatial autocorrelation statistic ($I_i$), also sometimes referred to as Anselin Local Moran's *I* (Anselin 1995) and is calculated by:  
 
@@ -210,14 +208,11 @@ As alluded  to early in addition to a local statistic we also have a Global metr
 
 $$I = \sum_{i=1} \frac{I_{i}}{n} $$
 
-As introduced above, if the Moran's I statistic is positive indicates that a feature has neighboring features with similarly high or low attribute values; this feature is part of a cluster at the local level. Alternatively if the Moran's I statistic is negative it indicates that a feature has neighboring features with dissimilar values.Moran's I statistic is a relative metric and therefore a $z$score and $\rho$-value can also be calculated to determine statistical significance. 
+As introduced above, if the Moran's *I* statistic is positive indicates that a feature has neighboring features with similarly high or low attribute values; this feature is part of a cluster at the local level. Alternatively if the Moran's *I* statistic is negative it indicates that a feature has neighboring features with dissimilar values.Moran's *I* statistic is a relative metric and therefore a $z$score and $\rho$-value can also be calculated to determine statistical significance. 
 
 Enough talk, lets jump into `R`!! 
-<center>
-![](https://media.giphy.com/media/3E1yVKeqS9JGcHLm0O/200w_d.gif)
-</center>
 
-Calculating Moran's I statistic by hand. Code adapted from [rspatial.org](https://rspatial.org/analysis/3-spauto.html){target="_blank"}.
+Lets first calculate Moran's *I* statistic by hand to understand the nuts and bolts of the calculate. I often find this is the best way to fully appreciate and understand the statistic. This code has been adapted from [rspatial.org](https://rspatial.org/analysis/3-spauto.html){target="_blank"}...another fantastic resource well worth bookmarking (**HINT!! HINT!!**).
 ```{r moranI code}
 wm=nb2mat(w, style='B');#spatial weights matrix
 
@@ -245,7 +240,7 @@ MI
 
 ```
 
-Now remember the calculated Moran's I value of `r round(MI,3)` as we are going to now use the functions in the `spdep` package to calculate this value and test for significance. 
+Now remember the calculated Moran's *I* value of `r round(MI,3)` as we are going to now use the functions in the `spdep` package to calculate this value and test for significance. 
 
 First we need to prep the spatial weights, this time in the form of a list rather than a matrix.
 
@@ -261,9 +256,133 @@ MI2=moran(th.dat$TP_mgkg, ww, n=length(ww$neighbours), S0=Szero(ww))
 MI2
 ```
 
-The `moran` function provides the Moran's I value (looks similar to the long hand version right?) and the sample kurtosis (K, not to be confused with the K discussed with ANN). Alright so now we need to determine if the value is statistically significant. We can go about this in two ways. The first is a parametric evaluation of statistical significance the other is a Monte Carlo simulation. The Monte Carlo approach evlauated the observed value of Moran’s I  compared with a simulated distribution to see how likely it is that the observed values could be considered a random draw. Let walk through both shall we. 
+The `moran()` function provides the Moran's *I* value (looks similar to the long hand version right?) and the sample kurtosis (K, not to be confused with the K discussed with ANN). Alright, so now we need to determine if the value is statistically significant. We can go about this in two ways. The first is a parametric evaluation of statistical significance the other is a Monte Carlo simulation. The Monte Carlo approach evaluated the observed value of Moran’s I  compared with a simulated distribution to see how likely it is that the observed values could be considered a random draw. Let walk through both shall we. 
+
+The parametric approach which uses linear regression based logic and assumptions is pretty straight forward.
+
+```{r}
+moran.test(th.dat$TP_mgkg, ww,randomisation=F)
+```
+
+The biggest assumption of this analysis is if the data is normally distributed. 
+```{r}
+shapiro.test(th.dat$TP_mgkg)
+```
+
+```{r hist, fig.cap="Histogram of (fake) soil total phosphorus concnetrations across the study area.", fig.height=3.5, fig.width=6, fig.align="center",echo=FALSE}
+ylim.val=c(0,50);by.y=10;ymaj=seq(ylim.val[1],ylim.val[2],by.y);ymin=seq(ylim.val[1],ylim.val[2],by.y/2)
+xlim.val=c(200,700);by.x=100;xmaj=seq(xlim.val[1],xlim.val[2],by.x);xmin=seq(xlim.val[1],xlim.val[2],by.x/2)
+
+par(family="serif",mar=c(1.5,2,1,0.5),oma=c(1.5,2,0.25,0.5));
+
+hist(th.dat$TP_mgkg,yaxt="n",xaxt="n",main=NA,ylab=NA,xlab=NA,col=adjustcolor("dodgerblue1",0.5),ylim=ylim.val,xlim=xlim.val,yaxs="i")
+axis_fun(1,xmaj,xmin,xmaj,1)
+axis_fun(2,ymaj,ymin,ymaj,1)
+box(lwd=1)
+mtext(side=2,line=2.5,"Frequency")
+mtext(side=1,line=2,"Soil Total Phosphorus (mg kg\u207B\u00B9)")
+
+```
+
+As you can see the data is not normally distributed, however if the data is log-transformed it becomes normally distributed. Using the `moran.test()` function with log-transformed data also results in a statistically significant test. Now lets look at the Monte Carlo simulation approach. It is very similar to the above test, except you can specify the number of simulations.  
+
+```{r,echo=1:2,fig.cap="Monte Carlo simulated values versus actual Moran's *I* value. Shaded region indicates density of simulated Moran's *I* versus the actual value (red-line).", fig.height=3.5, fig.width=6, fig.align="center"}
+mc.rslt=moran.mc(th.dat$TP_mgkg, ww,nsim=200)
+mc.rslt
 
 
+ylim.val=c(0,10);by.y=2;ymaj=seq(ylim.val[1],ylim.val[2],by.y);ymin=seq(ylim.val[1],ylim.val[2],by.y/2)
+xlim.val=c(-0.2,0.6);by.x=0.1;xmaj=seq(xlim.val[1],xlim.val[2],by.x);xmin=seq(xlim.val[1],xlim.val[2],by.x/2)
+par(family="serif",mar=c(1.5,2,1,0.5),oma=c(1.5,2,0.25,0.5));
+den.dat=density(mc.rslt$res[1:200])
+plot(y~x,data.frame(den.dat[c(1,2)]),type="n",yaxt="n",xaxt="n",ylab=NA,xlab=NA,ylim=ylim.val,xlim=xlim.val,yaxs="i",xaxs="i")
+abline(h=ymaj,v=xmaj,lty=3,col="grey");abline(v=0)
+with(data.frame(den.dat[c(1,2)]),shaded.range(x,rep(0,length(x)),y,bg="dodgerblue1",lty=1))
+abline(v=mc.rslt$res[201],col="red",lwd=2)
+axis_fun(1,xmaj,xmin,xmaj,1)
+axis_fun(2,ymaj,ymin,ymaj,1)
+box(lwd=1)
+mtext(side=2,line=2, "Density")
+mtext(side=1,line=2, "Test Statistic")
+
+```
+
+As you can see the actual Moran's *I* (i.e. red line) is far outside the simulated data (shaded range) indicating a statistically significantly relationship. 
+
+To visualize the spatial autocorrleation in the dataset we can construct a "Moran scatter plot". This plot displays the spatial data against its spatially lagged values. Much like everything in the R-universe (in a booming voice) "You have the Power...", as in there are several ways to do something. Below is the most straight forward way I have found to construct a Moran Scatter plot. Also you can identify the data points that have a high influence on the linear relationship between the data and the lag. This plot can easily be done using the `moran.plot()` function, but learning what goes into the plot helps us appreciate the code behind it...also it allows from customization, think of it as "pimp-my-plot". 
+
+
+```{r}
+#build a dataframe with scaled and lagged data
+scatter.dat=data.frame(SITE=th.dat$Site,
+                       sc=scale(th.dat$TP_mgkg),
+                       lag_sc=lag.listw(ww,scale(th.dat$TP_mgkg)));
+#Linear relationship between scaled and lagged data
+xwx.lm=lm(lag_sc ~ sc,scatter.dat)
+#Predicted line (and prediction/confidence interval)
+xwx.lm.pred=data.frame(x.val=seq(-2,3,0.5),
+                       predict(xwx.lm,data.frame(sc=seq(-2,3,0.5)),interval="confidence"))
+
+#Identify data points of high influence.
+infl.xwx=influence.measures(xwx.lm)
+infl.xwx.pt=which(apply(infl.xwx$is.inf, 1, any))
+#scatter.dat[infl.xwx.pt,]
+```
+
+```{r,fig.cap="Moran's Scatter Plot with points of high influence (red-diamonds) and linear relationship (red line) identified. ", fig.height=3.5, fig.width=6, fig.align="center",echo=F}
+ylim.val=c(-10,15);by.y=5;ymaj=seq(ylim.val[1],ylim.val[2],by.y);ymin=seq(ylim.val[1],ylim.val[2],by.y/2)
+xlim.val=c(-2,3);by.x=1;xmaj=seq(xlim.val[1],xlim.val[2],by.x);xmin=seq(xlim.val[1],xlim.val[2],by.x/2)
+par(family="serif",mar=c(1.5,2,1,0.5),oma=c(1.5,2,0.25,0.5));
+
+plot(lag_sc~sc,scatter.dat,type="n",yaxt="n",xaxt="n",ylab=NA,xlab=NA,ylim=ylim.val,xlim=xlim.val)
+abline(h=ymaj,v=xmaj,lty=3,col="grey")
+with(scatter.dat,points(sc,lag_sc,pch=21,bg=adjustcolor("grey",0.5),cex=1.25))
+with(scatter.dat[infl.xwx.pt,],points(sc,lag_sc,pch=23,bg="indianred1",cex=1.5))
+with(xwx.lm.pred,lines(x.val,fit,lwd=2,col="red"))
+#with(xwx.lm.pred,shaded.range(x.val,lwr,upr,"grey"))
+abline(h = mean(scatter.dat$lag_sc),v=mean(scatter.dat$sc), lty = 2)
+axis_fun(1,xmaj,xmin,xmaj,1)
+axis_fun(2,ymaj,ymin,ymaj,1)
+mtext(side=1,line=2,"Scaled Soil TP Concentration")
+mtext(side=2,line=2,"Lagged Soil TP Concentration")
+```
+
+
+Based on this global evaluation of the dataset we can conclude that based on the significantly positive Moran's *I* value that similar values appear close to each other (i.e. clustered in space). This is where we can dive into the data and evaluate areas of clustering possibly alluding to a hotspot.
+
+Similarly to the global analysis (above) local Moran's *I* relays on spatial weights of objects to calculate the test statistic (see equations above). 
+
+```{r}
+locali=localmoran(th.dat$TP_mgkg,ww)
+
+#Store test statistic results
+th.dat$locali.val=locali[,1]
+th.dat$locali.pval=locali[,5]
+```
+
+To identify potential clusters of data we must identify attribute features that are both statistically significant ($\rho<0.05$) and positive Moran's $I_i$. 
+
+```{r}
+th.dat$cluster=with(th.dat@data,
+                    as.factor(ifelse(locali.val>0&locali.pval<=0.05,
+                                     "Clustered","Not Clustered")))
+```
+
+Now lets look at what we have. 
+
+```{r,fig.cap="Left: Local Moran's Clusters as indicated with positive Moran's $I_i$ and a $\\rho$ value equal to or less-than 0.05. Right: Soil total phosphorus data (fictious data).", fig.align="center",echo=F,warning=FALSE}
+tm_shape(th.dat,bbox=bbox(gBuffer(th.dat,width=500)))+
+  tm_polygons(col=c("cluster","TP_mgkg"),
+              title=c("Local Moran's\nCluster", "Soil TP Conc\n(mg kg\u207B\u00B9)"),
+              palette=list(c("red","white"),"-RdYlGn"))
+
+```
+
+In our (fake) example data we have Here we see two distinct clusters of data (red areas). When we look at the soil TP concentration data we see an area of high concentration to the north and an area of low concentration to the south. Therefore, we can conclude we have two potential clusters of data representing a high and low cluster of values.  
+
+Hope this has provided some insight to geospatial statistical analysis.Much like the last blog post, this is by no means a comprehensive workflow of spatial autocorrelation. Other types of spatial autocorrelation analyses are available with each having their own limitation and application. Feel free to explore the world-wide web and don't be afraid to use `?`.  Originally I was also going to delve into hot-spot detection using Getis Ord statistics but I think it would be better to reserve that for the next post. 
+
+***
 
 ## References
 
