@@ -8,7 +8,7 @@ layout: post
 
 
 <section class="main-content">
-<p><strong>Keywords:</strong> geostatistics, R, soil science</p>
+<p><strong>Keywords:</strong> geostatistics, R, autocorrelation, Moran, soil science</p>
 <hr />
 <p>Continuing our series on geospatial analysis we are doing to dive into spatial statistics expanding analyses of spatial patterns. In my <a href="https://swampthingpaul.github.io/blog/geospatial-data-analysis-in-rstats.-part-1/" target="_blank">prior post</a> I presented spatial interpolation techniques including kriging. Just like in the last post I will be using <a href="https://swampthingpaul.github.io/blog/mapping-in-rstats/" target="_blank">tmap</a> to display our geospatial data. Also like in the last post I will be using a “fake” dataset from real stations with a randomly generated imposed spatial gradient for demonstration purposes.</p>
 <p>First lets load the necessary R-packages/libraries.</p>

@@ -9,7 +9,7 @@ editor_options:
   chunk_output_type: console
 ---
 
-__Keywords:__ geostatistics, R, soil science
+__Keywords:__ geostatistics, R, autocorrelation, Moran, soil science
 
 ***
 
