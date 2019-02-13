@@ -42,5 +42,5 @@ knit.clean=function(post.name){
 #file.remove("_knitr/2019-01-20-RGeostat.html") 
 #unlink("_knitr/2019-01-20-RGeostat_files",recursive=T)
 
+#knit.clean("2019-02-12-RGeostat2")
 
-#file.create("_knitr/test.Rmd")
