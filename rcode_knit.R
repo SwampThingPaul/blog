@@ -1,5 +1,5 @@
 #devtools::install_github("privefl/prettyjekyll")
-
+setwd("D:/_GitHub/blog")
 knit.clean=function(post.name){
   require(prettyjekyll)
   FormatPost(paste0("_knitr/",post.name,".Rmd"))
@@ -44,5 +44,5 @@ knit.clean=function(post.name){
 
 #knit.clean("2019-02-12-RGeostat2")
 
-knit.clean("2019-05-15-NetCDF")
+#knit.clean("2019-05-15-NetCDF")
 
