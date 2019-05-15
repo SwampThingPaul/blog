@@ -172,12 +172,10 @@ If you notice the `slice1` and `slice2` are "Large matrix" files and not spatial
 #Defining the projection
 utm17.pro=CRS("+proj=utm +zone=17 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs")
 
-slice1.r <- raster(t(slice1), xmn=min(lon), xmx=max(lon), ymn=min(lat), ymx=max(lat), 
-                   crs=utm17.pro)
+slice1.r <- raster(t(slice1), xmn=min(lon), xmx=max(lon), ymn=min(lat), ymx=max(lat),crs=utm17.pro)
 slice1.r <- flip(slice1.r, direction='y')
 
-slice2.r <- raster(t(slice2), xmn=min(lon), xmx=max(lon), ymn=min(lat), ymx=max(lat), 
-                   crs=utm17.pro)
+slice2.r <- raster(t(slice2), xmn=min(lon), xmx=max(lon), ymn=min(lat), ymx=max(lat),crs=utm17.pro)
 slice2.r <- flip(slice2.r, direction='y')
 ```
 
