@@ -48,7 +48,7 @@ library(RColorBrewer) # package for color ramps
 
 Navigate to the data [website](https://sofia.usgs.gov/eden/models/watersurfacemod_download.php#netcdf){target="_blank"} and pick a data file. I decided on [2017_Q4](https://sofia.usgs.gov/eden/data/netcdf/v2/2017_q4_v2prov.zip){target="_blank"} (link will download a file). Once the file is downloaded, unzip the file using either R with the `unzip()` function or some other decompression software/operating system tools. 
 
-```{r, echo=F}
+```{r, echo=F,warning=F,message=F}
 # resources
 #http://geog.uoregon.edu/bartlein/courses/geog490/week04-netCDF.html
 #https://rpubs.com/boyerag/297592
