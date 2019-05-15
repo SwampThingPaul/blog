@@ -1,0 +1,214 @@
+---
+title: "NetCDF data and R"
+date: "May 15, 2019 "
+output: 
+  prettydoc::html_pretty:
+  theme: default
+highlight: github
+editor_options: 
+  chunk_output_type: console
+---
+  
+  __Keywords:__ data format, NetCDF, R,
+
+***
+
+Apologies for the extreme hiatus in blog posts. I am going to ease back into things by discussing NetCDF files and how to work with them in R. In recent years, NetCDF files have gained popularity especially for climatology, meteorology, remote sensing, oceanographic and GIS data applications. As you would have guessed it, NetCDF is an acronym that stands for **Net**work **C**ommon **D**ata **F**orm. [NetCDF](https://www.unidata.ucar.edu/publications/factsheets/current/factsheet_netcdf.pdf){target="_blank"} and can be described as an open-source array-oriented data storage format.
+
+Here are a few examples of data stored in NetCDF format:
+
+- Climate data from [https://climate.copernicus.eu/](https://cds.climate.copernicus.eu/cdsapp#!/search?type=dataset){target="_blank"}.
+
+- Climate and atmospheric data from [https://www.ecmwf.int/](https://www.ecmwf.int/en/forecasts/datasets){target="_blank"}.
+
+- Climate data from [https://climatedataguide.ucar.edu/](https://climatedataguide.ucar.edu/climate-data){target="_blank"}.
+
+- Oceanographic data from [NOAA](https://data.nodc.noaa.gov/cgi-bin/iso?id=gov.noaa.nodc:NCEI-WOD){target="_blank"}.
+
+- Antarctic bathymetry data. Here is a blog post on [rOpenSci.org](https://ropensci.org/blog/2018/11/13/antarctic/){target="_blank"} discussing retrieval of Antarctic bathymetry data.
+
+- Everglades Water level data from [US Geological Survey](https://sofia.usgs.gov/eden/models/watersurfacemod_download.php#netcdf){target="blank"}.
+
+
+For this blog post I will walk through my exploration of working with NetCDF files in R using the Everglades water level data (above) as an example. The data is actually a double whammy, its geospatial and hydrologic data. This blog post is ultimately bits and pieces of other blog posts scatter around the web. I hope you find it useful. 
+
+***
+
+First lets load the necessary R-packages/libraries. 
+```{r libraries,echo=T,message=F,warning=F}
+# Libraries
+library(chron) # package for creating chronological objects
+library(ncdf4)  # package to handle NetCDF
+
+library(raster) # package for raster manipulation
+library(rgdal) # package for geospatial analysis
+library(tmap) # package for plotting map data
+library(RColorBrewer) # package for color ramps
+```
+
+Navigate to the data [website](https://sofia.usgs.gov/eden/models/watersurfacemod_download.php#netcdf){target="_blank"} and pick a data file. I decided on [2017_Q4](https://sofia.usgs.gov/eden/data/netcdf/v2/2017_q4_v2prov.zip){target="_blank"} (link will download a file). Once the file is downloaded, unzip the file using either R with the `unzip()` function or some other decompression software/operating system tools. 
+
+```{r, echo=F}
+# resources
+#http://geog.uoregon.edu/bartlein/courses/geog490/week04-netCDF.html
+#https://rpubs.com/boyerag/297592
+#http://geog.uoregon.edu/bartlein/courses/geog607/Rmd/netCDF_01.htm
+#http://clarkrichards.org/r/oce/modis/chl/sp/raster/2017/03/25/modis-chl-data/
+
+#setwd("D:/UF/_Working_Blog/NetCDFBlog")
+working.dir="D:/UF/_Working_Blog/NetCDFBlog"
+
+GIS.path.gen="D:/_GISData"
+utm17=CRS("+proj=utm +zone=17 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs")
+
+#ogrListLayers(paste0(GIS.path.gen,"/SFER_GIS_Geodatabase.gdb"))
+EvPA=spTransform(readOGR(paste0(GIS.path.gen,"/SFER_GIS_Geodatabase.gdb"),"EPA_Boundary"),utm17)
+canals=spTransform(readOGR(paste0(GIS.path.gen,"/SFER_GIS_Geodatabase.gdb"),"SFWMD_Canals"),utm17)
+coast=spTransform(readOGR(paste0(GIS.path.gen,"/SFER_GIS_Geodatabase.gdb"),"SFWMD_Shoreline"),utm17)
+```
+
+Alright now that the file is downloaded and unzipped lets open the file. I created an variable called `working.dir` which is a string indicating my "working directory" location (`working.dir<-"D:/UF/_Working_Blog/NetCDFBlog"`) and points me to where I downloaded and unzipped the data file.
+
+```{r ,echo=T,message=F,warning=F}
+dat.nc<-nc_open(paste0(working.dir,"/USGS_EDEN/2017_q4.nc"))
+```
+
+Excellent! The data is now in the R-environment, let take a look at the data.
+
+```{r }
+print(dat.nc)
+```
+
+As you can see all the metadata needed to understand what the `dat.nc` file is lives in the file. Definately a pro for using NetCDF files. Now lets extract our three dimensions (latitude, longitude and time).
+
+```{r}
+lon <- ncvar_get(dat.nc,"x");# extracts longitude
+nlon <- dim(lon);# returns the number of records
+
+lat <- ncvar_get(dat.nc,"y");# extracts latitude
+nlat <- dim(lat);# returns the number of records
+
+time <- ncvar_get(dat.nc,"time");# extracts time
+tunits <- ncatt_get(dat.nc,"time","units");# assigns units to time
+nt <- dim(time)
+```
+
+Now that we have our coordinates in space and time extracted let get to the actual data. If you remember when we viewed the dataset using `print()` sifting through the output you'll notice `long_name: stage`, that is our data.
+
+```{r}
+dname="stage"
+tmp_array <- ncvar_get(dat.nc,dname)
+dlname <- ncatt_get(dat.nc,dname,"long_name")
+dunits <- ncatt_get(dat.nc,dname,"units")
+fillvalue <- ncatt_get(dat.nc,dname,"_FillValue")
+```
+
+We can also extract other information including global attributes such as title, source, references, etc. from the datasets metadata. 
+
+```{r}
+# get global attributes
+title <- ncatt_get(dat.nc,0,"title")
+institution <- ncatt_get(dat.nc,0,"institution")
+datasource <- ncatt_get(dat.nc,0,"source")
+references <- ncatt_get(dat.nc,0,"references")
+history <- ncatt_get(dat.nc,0,"history")
+Conventions <- ncatt_get(dat.nc,0,"Conventions")
+```
+
+Now that we got everything we wanted from the NetCDF file we can "close" the connection by using `nc_close(dat.nc)`. 
+
+```{r,echo=F}
+nc_close(dat.nc)
+```
+
+The data we just extracted from this NetCDF file is a time-series of daily spatially interpolated water level data across a large ecosystem (several thousand km^2^). Using the `chron` library lets format this data to something more workable by extracting the date information from `tunits$value` and `time` variables.  
+
+```{r}
+tustr <- strsplit(tunits$value, " ")
+tdstr <- strsplit(unlist(tustr)[3], "-")
+tmonth <- as.integer(unlist(tdstr)[2])
+tday <- as.integer(substring(unlist(tdstr)[3],1,2))
+tyear <- as.integer(unlist(tdstr)[1])
+time.val=as.Date(chron(time,origin=c(tmonth, tday, tyear)))
+```
+
+We know from both the metadata information within the file and information from where we retrieved the data that this NetCDF is an array representing the fourth quarter of 2017. This information combined with the extracted day, month and year information above we can determine the date corresponding to each file within the NetCDF array
+
+```{r}
+head(time.val)
+```
+
+Like most data, sometime values of a variable are missing or not available (outside of modeling domain) and are identified using a specific "fill value" (`_FillValue`) or "missing value" (`missing_value`). To replace theses values its pretty simple and similar to that of a normal data frame. 
+
+```{r}
+# replace netCDF fill values with NA's
+tmp_array[tmp_array==fillvalue$value] <- NA
+```
+
+To count the number of data points (i.e. non-NA values) you can use `length(na.omit(as.vector(tmp_array[,,1])))`
+
+Now that the data is extracted, sorted and cleaned lets take a couple of slices from this beautiful NetDF pie.
+
+```{r}
+# get a single slice or layer (day)
+m <- 1
+slice1 <- tmp_array[,,m]
+time.val[m];#corresponding day
+```
+
+```{r}
+# get a single slice or layer (day)
+m <- 20
+slice2 <- tmp_array[,,m]
+time.val[m]
+```
+
+***Before we get to the mapping nitty gritty*** visit my prior blog post on [Mapping in #rstats](https://swampthingecology.org/blog/mapping-in-rstats/){target="_blank"}. To generate the maps I will be using the `tmap` library.
+
+
+If you notice the `slice1` and `slice2` are "Large matrix" files and not spatial files yet. Remember back when we looked at the metadata in the file header using `print(dat.nc)`? It identified the spatial projection of the data in the `esri_pe_string:` field. During the process of extracting the  NetCDF slice and the associated transformation to a raster the data is i the wrong orientation therefore we have to use the `flip()` function to get it pointed in the correct direction.
+
+```{r}
+#Defining the projection
+utm17.pro=CRS("+proj=utm +zone=17 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs")
+
+slice1.r <- raster(t(slice1), xmn=min(lon), xmx=max(lon), ymn=min(lat), ymx=max(lat), 
+                   crs=utm17.pro)
+slice1.r <- flip(slice1.r, direction='y')
+
+slice2.r <- raster(t(slice2), xmn=min(lon), xmx=max(lon), ymn=min(lat), ymx=max(lat), 
+                   crs=utm17.pro)
+slice2.r <- flip(slice2.r, direction='y')
+```
+
+Now lets take a look at our work!
+
+```{r,echo=F,fig.align="center"}
+tm_shape(coast)+tm_polygons(col="blanchedalmond")+
+tm_shape(slice1.r,is.master=T)+tm_raster(palette = "YlGnBu",n=10,title="Stage Elevation (cm, NGVD88)\n for 10/01/2017 ")+
+  tm_shape(EvPA,name="Everglades Protection Area")+tm_borders(col="red",lwd=2)+
+  tm_shape(canals)+tm_lines(col="cadetblue2",lwd=1.5)+tm_layout(legend.outside = T)
+
+tm_shape(coast)+tm_polygons(col="blanchedalmond")+
+tm_shape(slice2.r,is.master=T)+tm_raster(palette = "YlGnBu",n=10,title="Stage Elevation (cm, NGVD88)\n for 10/20/2017 ")+
+  tm_shape(EvPA)+tm_borders(col="red",lwd=2)+
+  tm_shape(canals)+tm_lines(col="cadetblue2",lwd=1.5)+tm_layout(legend.outside = T)
+```
+
+Now that these slices are raster files, you can take it one step further and do raster based maths...for instance seeing the change in water level between the two dates.
+
+```{r}
+slice.diff=slice2.r-slice1.r
+```
+
+```{r,echo=F,fig.align="center"}
+cols=c(rgb(175/255,124/255,64/255),"#ffffff",rgb(133/255,202/255,186/255))
+col.rmp=colorRampPalette(cols)
+cols.val=col.rmp(9)
+tm_shape(coast)+tm_polygons(col="blanchedalmond")+
+tm_shape(slice.diff,is.master=T)+tm_raster(palette =cols.val,n=9,title="Stage Difference between\n 10/20/2017 and 10/01/2017 (cm)",midpoint=0,style="fixed",breaks=c(-40,-30,-20,-10,0,0,20,40,60,80))+
+  tm_shape(EvPA,name="Everglades Protection Area")+tm_borders(col="red",lwd=2)+
+  tm_shape(canals)+tm_lines(col="cadetblue2",lwd=1.5)+tm_layout(legend.outside = T)
+```
+
+***

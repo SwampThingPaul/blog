@@ -44,3 +44,5 @@ knit.clean=function(post.name){
 
 #knit.clean("2019-02-12-RGeostat2")
 
+knit.clean("2019-05-15-NetCDF")
+
