@@ -92,7 +92,8 @@ Now we can convert the melt area in km^2^ to percent area like in the original i
 ```{r ,echo=T,message=F,warning=F}
 green.melt$MeltArea.per=(green.melt$MeltArea.sqkm/greenland.ice.area)*100
 
-green.melt.POR.stats=ddply(subset(green.melt,CY%in%seq(1979,2018,1)),"DOY",summarise,
+green.melt.POR.stats=ddply(subset(green.melt,CY%in%seq(1979,2018,1)),"DOY",
+                           summarise,
                            N.val=N(MeltArea.per),
                            decile.10=quantile(MeltArea.per,probs=0.1,na.rm=T),
                            decile.90=quantile(MeltArea.per,probs=0.9,na.rm=T),
@@ -100,7 +101,8 @@ green.melt.POR.stats=ddply(subset(green.melt,CY%in%seq(1979,2018,1)),"DOY",summa
                            Q75=quantile(MeltArea.per,probs=0.75,na.rm=T),
                            median=median(MeltArea.per,na.rm=T))
 
-green.melt.ref.stats=ddply(subset(green.melt,CY%in%seq(1981,2010,1)),"DOY",summarise,
+green.melt.ref.stats=ddply(subset(green.melt,CY%in%seq(1981,2010,1)),"DOY",
+                           summarise,
                            N.val=N(MeltArea.per),
                            median=median(MeltArea.per,na.rm=T))
 
@@ -151,15 +153,22 @@ To answer this question we need to calculate annual mean melt area across the pe
 
 ```{r ,echo=T,message=F,warning=F}
 alpha=0.95;
-greenland.melt.mean=ddply(subset(green.melt,CY%in%seq(1979,2018,1)),"CY",summarise,
+greenland.melt.mean=ddply(subset(green.melt,CY%in%seq(1979,2018,1)),"CY",
+                          summarise,
                           mean.val=mean(MeltArea.sqkm,na.rm=T),
                           sd.val=sd(MeltArea.sqkm,na.rm=T),
                           N.val=N(MeltArea.sqkm))
 
-greenland.melt.mean$Df=greenland.melt.mean$N.val-1; #Degree of freedom
-greenland.melt.mean$Tp=with(greenland.melt.mean,abs(qt(1-alpha,Df))); # test statistic
-greenland.melt.mean$LCI=with(greenland.melt.mean,mean.val-sd.val*(Tp/sqrt(N.val))); #Lower CI
-greenland.melt.mean$UCI=with(greenland.melt.mean,mean.val+sd.val*(Tp/sqrt(N.val))); #Upper CI
+#Degree of freedom
+greenland.melt.mean$Df=greenland.melt.mean$N.val-1; 
+#Test Statistic
+greenland.melt.mean$Tp=with(greenland.melt.mean,abs(qt(1-alpha,Df))); 
+#Lower CI
+greenland.melt.mean$LCI=with(greenland.melt.mean,
+                             mean.val-sd.val*(Tp/sqrt(N.val))); 
+#Upper CI
+greenland.melt.mean$UCI=with(greenland.melt.mean,
+                             mean.val+sd.val*(Tp/sqrt(N.val))); 
 
 ```
 
