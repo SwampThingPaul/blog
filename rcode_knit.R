@@ -46,3 +46,4 @@ knit.clean=function(post.name){
 
 #knit.clean("2019-05-15-NetCDF")
 
+#knit.clean("2019-06-25-DataViz")
