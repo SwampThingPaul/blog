@@ -320,7 +320,7 @@ mtext(side=2,line=1.5,"Eigenvalue")
 ```{r,echo=FALSE,fig.width=5,fig.height=4,fig.align='center',fig.cap="Scree plot of the variance and cumulative variance for each priniciple compoinent from `dat.xtab2.pca`."}
 par(family="serif",mar=c(1,1.5,0.1,0.1),oma=c(3,2,0.75,0.5));
 
-ylim.val=c(0,105);by.y=25;ymaj=seq(ylim.val[1],100,by.y);ymin=seq(ylim.val[1],100,by.y/2);#set y limit and delineates the major and minor ticks
+ylim.val=c(0,110);by.y=25;ymaj=seq(ylim.val[1],100,by.y);ymin=seq(ylim.val[1],100,by.y/2);#set y limit and delineates the major and minor ticks
 x=barplot(eig.pca$variance,ylim=ylim.val,col="white",border=0,yaxt="n")# inital plot to get the measurements
 abline(h=ymaj,lty=3,col="grey")#makes vertical lines from y axis
 x=barplot(eig.pca$variance,ylim=ylim.val,col="grey",yaxt="n",add=T)# the real plot that matters
@@ -430,7 +430,7 @@ head(dat.xtab2)
 
 ```{r,echo=FALSE,fig.width=8,fig.height=4.5,fig.align='center',fig.cap="PCA biplot of two component comparisons from the `data.xtab2.pca` analysis with rescaled loadings and Lakes identified."}
 
-par(family="serif",mar=c(2,3,0.1,0.5),oma=c(1,1.5,0.75,0.5));
+par(family="serif",mar=c(1.5,3,0.1,0.5),oma=c(0,1.5,0.75,0.5));
 layout(matrix(c(1:2,3,3),2,2,byrow=T),heights=c(1,0.3))
 
 #length(unique(dat.xtab2$LAKE))
