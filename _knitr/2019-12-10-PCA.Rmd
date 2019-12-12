@@ -109,8 +109,10 @@ Before moving forward I wanted to dedicate some additional time to some terms sp
 
 ## Analysis
 
-Now that we have the basic terminology laid out and we know the general assumptions lets do an example analysis. Since I am an aquatic biogeochemist I am going to use some limnological data. Here we have a subset of long-term monitoring locations from six lakes within south Florida monitored by the [South Florida Water Management District](https://www.sfwmd.gov/){target="_blank"} (SFWMD). To retrieve the data we will use the `AnalystHelper` package ([link](https://github.com/SwampThingPaul/AnalystHelper){target="_blank"}), which has a function to retrieve data from the SFWMD online environmental database [DBHYDRO](https://my.sfwmd.gov/dbhydroplsql/show_dbkey_info.main_menu){target="_blank"}. Here is  a quick map of the sites. 
+Now that we have the basic terminology laid out and we know the general assumptions lets do an example analysis. Since I am an aquatic biogeochemist I am going to use some limnological data. Here we have a subset of long-term monitoring locations from six lakes within south Florida monitored by the [South Florida Water Management District](https://www.sfwmd.gov/){target="_blank"} (SFWMD). To retrieve the data we will use the `AnalystHelper` package ([link](https://github.com/SwampThingPaul/AnalystHelper){target="_blank"}), which has a function to retrieve data from the SFWMD online environmental database [DBHYDRO](https://my.sfwmd.gov/dbhydroplsql/show_dbkey_info.main_menu){target="_blank"}. 
 
+<!--
+Here is  a quick map of the sites. 
 
 ```{r include=F,echo=F,message=F,warning=F}
 #GIS Libraries
@@ -133,7 +135,7 @@ tmap_mode("view")
 tm_basemap(leaflet::providers$Esri.WorldImagery,alpha=0.9)+
   tm_shape(sites,name="SFWMD WQ Monitoring (Active)")+tm_dots("dodgerblue1",size=0.04)
 ```
-
+-->
 
 Let retrieve and format the data for PCA analysis.
 
