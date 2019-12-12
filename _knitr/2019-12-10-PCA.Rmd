@@ -1,0 +1,499 @@
+---
+title: "PCA basics in #Rstats"
+date: "December 10, 2019"
+output: 
+  prettydoc::html_pretty:
+  theme: default
+  highlight: github
+editor_options: 
+  chunk_output_type: console
+bibliography: PCA_20191210.bib
+link-citations: yes
+---
+
+__Keywords:__ ordination, R, PCA
+
+***
+
+The masses have spoken!!
+
+```{r, out.width="50%",echo=FALSE,fig.align="center"}
+knitr::include_graphics("../images/20191210_PCA/twitterpoll.png")
+```
+
+Also I got a wise piece of advice from [mikefc](https://twitter.com/coolbutuseless){target="_blank"} regarding `R` blog posts.
+
+```{r, out.width="75%",echo=FALSE,fig.align="center"}
+knitr::include_graphics("../images/20191210_PCA/GhostBuster_meme.png")
+```
+
+
+***
+
+This post was partly motivated by an article by the [BioTuring Team](https://medium.com/@bioturing){target="_blank"} regarding [PCA](https://medium.com/@bioturing/how-to-read-pca-biplots-and-scree-plots-186246aae063?){target="_blank"}. In their article the authors provide the basic concepts behind interpreting a Principal Component Analysis (PCA) plot. Before rehashing PCA plots in `R` I would like to cover some basics. 
+
+Ordination analysis, which PCA is part of, is used to order (or ordinate...hence the name) multivariate data. Ultimately ordination makes new variables called principal axes along which samples are scored and/or ordered [@gotelli_primer_2004]. There are at least five routinely used ordination analyses, here I intend to cover just PCA. Maybe in the future I cover the other four as it relates to ecological data analysis. 
+
+## Principal Component Analysis
+
+I have heard PCA call lots of things in my day including but not limiting to magic, statistical hand waving, mass plotting, statistical guesstimate, etc. When you have a multivariate dataset (data with more than one variable) it can be tough to figure out what matters. Think water quality data with a whole suite of nutrients or fish study with biological, habitat and water chemistry data for several sites along a stream/river. PCA is the best way to reduce the dimesionality of multivariate data to determine what _statistically_ and practically matters. But its also beyond a data winnowing technique it can also be used to demonstrate similarity (or difference) between groups and relationships between variables. A major disadvantage of PCA is that it is a data hungry analysis (see assumptions below).
+
+### Assumptions of PCA
+
+Finding a single source related to the assumptions of PCA is rare. Below is combination of several sources including seminars, webpages, course notes, etc. Therefore this is not an exhaustive list of all assumptions and I could have missed some. I put this together for my benefit as well as your. Proceed with caution!!  
+
+* __Multiple Variables:__ This one is obvious. Ideally, given the nature of the analysis, multiple variables are required to perform the analysis. Moreover, variables should be measured at the continuous level, although ordinal variable are frequently used. 
+
+* __Sample adequacy:__ Much like most (if not all) statistical analyses to produce a reliable result large enough sample sizes are required. Generally a minimum of 150 cases (i.e. rows), or 5 to 10 cases per variable is recommended for PCA analysis. Some have suggested to perform a sampling adequacy analysis such as Kaiser-Meyer-Olkin Measure (KMO) Measure of Sampling Adequacy. However, KMO is less a function of sample size adequacy as its a measure of the suitability of the data for factor analysis, which leads to the next point. 
+
+* __Linearity relationships:__ It is assumed that the relationships between variables are linearly related. The basis of this assumption is rooted in the fact that PCA is based on Pearson correlation coefficients and therefore the assumptions of Pearson's correlation also hold true. Generally, this assumption is somewhat relaxed...even though it shouldn't be...with the use of ordinal data for variable.
+
+The `KMOS` and `bart_spher` functions in the  `REdaS` `R` library can be used to check the measure of sampling adequacy and if the data is different from an identity matrix , below is a quick example.
+
+```{r, message=F,warning=F,echo=T}
+library(REdaS)
+library(vegan)
+library(reshape)
+
+data(varechem);#from vegan package
+
+# KMO
+KMOS(varechem)
+
+# Bartlett's Test Of Sphericity
+bart_spher(varechem)
+```
+
+The `varechem` dataset appears to be suitable for factor analysis. The KMO value for the entire dataset is `r round(KMOS(varechem)$KMO,2)`, above the suggested 0.5 threshold. Furthermore, the data is significantly different from an identity matrix (_H~0~ :_ all off-diagonal correlations are zero).
+<!--http://minato.sip21c.org/swtips/factor-in-R.pdf-->
+
+* __No significant outliers:__ Like most statistical analyses, outliers can skew any analysis/ In PCA, outliers can have a disproportionate influence on the resulting component computation. Since principal components are estimated by essentially re-scaling the data retaining the variance outlier could skew the estimate of each component within a PCA. Another way to visualize how PCA is performed is that it uses rotation of the original axes to derive a new axes, which maximizes the variance in the data set. In 2D this looks like this:
+
+```{r,echo=FALSE,fig.width=4,fig.height=3.5,fig.align='center'}
+set.seed(1)
+x.val=sample(seq(-1,1,length.out=1000),100)*runif(100)
+y.val=x.val*runif(100,0.25,1.25)
+y.val=ifelse(y.val>0.2|y.val<(-0.2),y.val,runif(100,-0.2,0.2))
+
+par(family="serif",mar=c(0.5,0.5,0.5,0.5),oma=c(0.1,0.1,0.1,0.1),xpd=NA);
+plot(x.val,y.val,axes=F,ylab=NA,xlab=NA,type="n",ylim=c(-1,1),xlim=c(-1,1))
+abline(h=0,v=0)
+points(x.val,y.val,pch=21,bg=adjustcolor("dodger blue1",0.5),cex=1.25,lwd=0.01)
+PCA1=lm(y.val~x.val)
+PCA1.pred=predict(PCA1,data.frame(x.val=seq(min(x.val),max(x.val),length.out=100)))
+lines(seq(min(x.val),max(x.val),length.out=100),PCA1.pred,col="red",lwd=2.5)
+text(max(x.val),max(PCA1.pred),"PCA1",pos=4,font=2.5)
+angle=atan(coef(PCA1)[2])
+angle.new=angle+(90*pi/180)
+
+lines(seq(min(x.val),max(x.val),length.out=100),seq(-0.1,0.1,length.out=100)*tan(angle.new),col="red",lwd=2)
+text(min(x.val),max(seq(-0.1,0.1,length.out=100)*tan(angle.new)),"PCA2",pos=2,font=2)
+
+
+#abline(a=0,b=tan(-45*pi/180))
+
+
+```
+
+You would expect that if true outliers are present that the newly derived axes will be skewed. Outlier analysis and issues associated with identifying outliers is a whole other ball game that I will not cover here other than saying box-plots are not a suitable outlier identification analysis, see @mosteller_exploratory_1977 for more detail on boxplots (I have a manuscript _In Prep_ focusing on this exact issue).
+
+## Terminology
+
+Before moving forward I wanted to dedicate some additional time to some terms specific to component analysis. By now we know the general gist of PCA ... incase you were paying attention PCA is essentially a dimensionality reduction or data compression method to understand how multiple variable correlate in a given dataset. Typically when people discuss PCA they also use the terms loading, eigenvectors and eigenvalues.  
+
+* __Eigenvectors__ are unit-scaled loadings. Mathematically, they are the column sum of squared loadings for a factor. It conceptually represents the amount of variance accounted for by a given factor.  
+
+* __Eigenvalues__ also called characteristic roots is the measure of variation in the total sample accounted for by each factor. Computationally, a factor's eigenvalues are determined as the sum of its squared factor loadings for all the variables. The ratio of eigenvalues is the ratio of explanatory importance of the factors with respect to the variables (remember this for later).
+
+* __Factor Loadings__ is the correlation between the original variables and the factors. Analogous to Pearson's r, the squared factor loadings is the percent of variance in that variable explained by the factor (...again remember this for later). 
+
+## Analysis
+
+Now that we have the basic terminology laid out and we know the general assumptions lets do an example analysis. Since I am an aquatic biogeochemist I am going to use some limnological data. Here we have a subset of long-term monitoring locations from six lakes within south Florida monitored by the [South Florida Water Management District](https://www.sfwmd.gov/){target="_blank"} (SFWMD). To retrieve the data we will use the `AnalystHelper` package ([link](https://github.com/SwampThingPaul/AnalystHelper){target="_blank"}), which has a function to retrieve data from the SFWMD online environmental database [DBHYDRO](https://my.sfwmd.gov/dbhydroplsql/show_dbkey_info.main_menu){target="_blank"}. Here is  a quick map of the sites. 
+
+
+```{r include=F,echo=F,message=F,warning=F}
+#GIS Libraries
+library(rgdal)
+library(rgeos)
+library(tmap)
+
+GIS.path="D:/_GISData/" 
+
+utm17=CRS("+proj=utm +zone=17 +datum=WGS84 +units=m")
+wgs84=CRS("+proj=longlat +datum=WGS84 +no_defs +ellps=WGS84 +towgs84=0,0,0")
+
+wmd.monitoring=spTransform(readOGR(paste0(GIS.path,"SFWMD_Monitoring_20190909"),"Environmental_Monitoring_Stations"),utm17)
+
+sites=subset(wmd.monitoring,STATION%in%c("LZ40","ISTK2S","E04","D02","B06","A03")&ACTIVITY_S=="Surface Water Grab")
+```
+
+```{r,message=F,warning=F,echo=F,out.width="100%"}
+tmap_mode("view")
+tm_basemap(leaflet::providers$Esri.WorldImagery,alpha=0.9)+
+  tm_shape(sites,name="SFWMD WQ Monitoring (Active)")+tm_dots("dodgerblue1",size=0.04)
+```
+
+
+Let retrieve and format the data for PCA analysis.
+
+```{r, message=F,warning=F}
+#Libraries/packages needed
+library(AnalystHelper)
+library(reshape)
+
+#Date Range of data
+sdate=as.Date("2005-05-01")
+edate=as.Date("2019-05-01")
+
+#Site list with lake name (meta-data)
+sites=data.frame(Station.ID=c("LZ40","ISTK2S","E04","D02","B06","A03"),
+                 LAKE=c("Okeechobee","Istokpoga","Kissimmee","Hatchineha",
+                        "Tohopekaliga","East Tohopekaliga"))
+
+#Water Quality parameters (meta-data)
+parameters=data.frame(Test.Number=c(67,20,32,179,112,8,10,23,25,80,18,21),
+                      param=c("Alk","NH4","Cl","Chla","Chla","DO","pH",
+                              "SRP","TP","TN","NOx","TKN"))
+
+# Retrieve the data
+dat=DBHYDRO_WQ(sdate,edate,sites$Station.ID,parameters$Test.Number)
+
+# Merge metadata with dataset
+dat=merge(dat,sites,"Station.ID")
+dat=merge(dat,parameters,"Test.Number")
+
+# Cross tabulate the data based on parameter name
+dat.xtab=cast(dat,Station.ID+LAKE+Date.EST~param,value="HalfMDL",mean)
+
+# Cleaning up/calculating parameters
+dat.xtab$TN=with(dat.xtab,TN_Combine(NOx,TKN,TN))
+dat.xtab$DIN=with(dat.xtab, NOx+NH4)
+
+# More cleaning of the dataset 
+vars=c("Alk","Cl","Chla","DO","pH","SRP","TP","TN","DIN")
+dat.xtab=dat.xtab[,c("Station.ID","LAKE","Date.EST",vars)]
+
+head(dat.xtab)
+```
+
+If you are playing the home game with this dataset you'll notice some `NA` values, this is because that data was either not collected or removed due to fatal laboratory or field QA/QC. PCA doesn't work with NA values, unfortunately this means that the whole row needs to be excluded from the analysis. 
+
+Lets actually get down to doing a PCA analysis. First off, you have several different flavors (funcations) of PCA to choose from. Each have there own nuisances and come from different packages. 
+
+* `prcomp()` and `princomp()` are from the base `stats` package. The quickest, easiest and most stable version since its in base. 
+    
+* `PCA()` in the `FactoMineR` package.
+
+* `dubi.pca()` in the `ade4` package.
+
+* `acp()` in the `amap` package.
+
+* `rda()` in the `vegan` package. More on this later. 
+    
+Personally, I only have experience working with `prcomp`, `princomp` and `rda` functions for PCA. The information shown here in this post can be extracted or calculated from any of these functions. Some are straight forward others are more sinuous. Above I mentioned using the `rda` function for PCA analysis. `rda()` is a function in the `vegan` `R` package for redundancy analysis (RDA) and the function I am most familiar with to perform PCA analysis. Redundancy analysis is a technique used to explain a dataset Y using a dataset X. Normally RDA is used for "constrained ordination" (ordination with covariates or predictors). Without predictors, RDA is the same as PCA. 
+
+As I mentioned above, `NA`s are a no go in PCA analysis so lets format/clean the data and we can see how much the data is reduced by the `na.omit` action.
+```{r}
+dat.xtab2=na.omit(dat.xtab)
+
+nrow(dat.xtab)
+
+nrow(dat.xtab2)
+
+```
+
+Also its a good idea as with most data, is to look at your data. Granted when the number of variables get really big...imagine trying to looks at a combination of more than eight or nine parameters. Here we have a scatterplot of water quality data within our six lakes. The parameters in this analysis is Alkalinity (ALK), Chloride (Cl), chlorophyll-_a_ (Chl-a), dissolved oxygen (DO), pH, soluble reactive phosphorus (SRP), total phosphorus (TP), total nitrogen (TN) and dissolved inorganic nitrogen (DIN).
+
+```{r,echo=FALSE,fig.width=8,fig.height=6,fig.align='center',fig.cap="Scatterplot of all data for the example `dat.xtab2` dataset."}
+par(family="serif",mar=c(1,1.5,0.1,0.1),oma=c(3,3.5,0.75,0.5));
+layout(matrix(1:72,8,8))
+
+params=c(names(dat.xtab2)[4:12])
+axis.lab=c("Alk\n(mg L\u207B\u00B9)","Cl\n(mg L\u207B\u00B9)", "Chl-a\n(\u03BCg L\u207B\u00B9)","DO\n(mg L\u207B\u00B9)","pH\n(unitless)","SRP\n(mg L\u207B\u00B9)","TP\n(mg L\u207B\u00B9)", "TN\n(mg L\u207B\u00B9)","DIN\n(mg L\u207B\u00B9)")
+
+for(j in 1:8){
+  if(j!=1){for(k in 1:(j-1)){plot(0:1,0:1,axes=F,type="n",ylab=NA,xlab=NA)}}
+
+params2=params[-1:-j]
+axis.lab2=axis.lab[-1:-j]
+xlim.val=c(0,175);by.x=50;xmaj=seq(xlim.val[1],xlim.val[2],by.x);xmin=seq(xlim.val[1],xlim.val[2],by.x/2)
+lim.min=c(0,0,0,0,5,0,0,0,0)
+lim.max=c(175,80,125,13,10,0.15,1.5,10,0.8);by.val=c(75,40,75,6,2.5,0.06,0.75,5,0.4)
+for(i in 1:length(params2)){
+  xlim.val=c(lim.min[j],lim.max[j]);by.x=by.val[j];xmaj=seq(xlim.val[1],xlim.val[2],by.x);xmin=seq(xlim.val[1],xlim.val[2],by.x/2)
+  ylim.val=c(lim.min[-1:-j][i],lim.max[-1:-j][i]);by.y=by.val[-1:-j][i];ymaj=seq(ylim.val[1],ylim.val[2],by.y);ymin=seq(ylim.val[1],ylim.val[2],by.y)
+  plot(dat.xtab[,params[j]],dat.xtab[,params2[i]],xlim=xlim.val,ylim=ylim.val,axes=F,type="n",ylab=NA,xlab=NA)
+  abline(h=ymaj,v=xmaj,lty=3,col="grey")
+  points(dat.xtab[,params[j]],dat.xtab[,params2[i]],pch=21,bg=adjustcolor("dodgerblue1",0.25),col=adjustcolor("grey",0.5),lwd=0.01,cex=0.8)
+  if(i==length(params2)){axis_fun(1,xmaj,xmin,format(xmaj),cex=0.8,line=-0.75)}else{axis_fun(1,xmaj,xmin,NA,cex=0.8,line=-0.5)}
+  if(j==1){axis_fun(2,ymaj,ymin,format(ymaj),cex=0.8)}else{axis_fun(2,ymaj,ymin,NA,cex=0.8)}
+  box(lwd=1)
+  if(j==1){mtext(side=2,line=2.25,cex=0.8,axis.lab2[i])}
+}
+mtext(side=1,line=2.5,cex=0.8,axis.lab[j])
+}
+
+```
+
+Alright, now the data is formatted and we have done some general data exploration. Lets check the adequacy of the data for component analysis...remember the KMO analysis?
+
+```{r, message=F,warning=F,echo=T}
+
+KMOS(dat.xtab2[,vars])
+
+```
+
+Based on the KMO analysis, the KMO-Criterion of the dataset is `r round(KMOS(dat.xtab2[,vars])$KMO,2)`, well above the suggested 0.5 threshold.
+
+Lets also check if the data is significantly different from an identity matrix. 
+
+```{r, message=F,warning=F,echo=T}
+
+bart_spher(dat.xtab2[,vars])
+
+```
+
+Based on Sphericity test (`bart_spher()`) the results looks good to move forward with a PCA analysis. The actual PCA analysis is pretty straight forward after the data is formatted and _"cleaned"_.
+
+```{r, message=F,warning=F,echo=T}
+library(vegan)
+
+dat.xtab2.pca=rda(dat.xtab2[,vars],scale=T)
+
+```
+
+Before we even begin to plot out the typical PCA plot...try `biplot()` if your interested. Lets first look at the importance of each component and the variance explained by each component. 
+
+
+```{r, message=F,warning=F,echo=T}
+#Extract eigenvalues (see definition above)
+eig <- dat.xtab2.pca$CA$eig
+
+# Percent of variance explained by each compoinent
+variance <- eig*100/sum(eig)
+
+# The cumulative variance of each component (should sum to 1)
+cumvar <- cumsum(variance)
+
+# Combine all the data into one data.frame
+eig.pca <- data.frame(eig = eig, variance = variance,cumvariance = cumvar)
+
+```
+
+As with most things in `R` there are always more than one way to do things. This same information can be extract using the `summary(dat.xtab2.pca)$cont`. 
+
+What does the component eigenvalue and percent variance mean...and what does it tell us. This information helps tell us how much variance is explained by the components. It also helps identify which components should be used moving forward. 
+
+Generally there are two general rules: 
+
+1. Pick components with eignvalues of at least 1. 
+    - This is called the Kaiser rule. A variation of this method has been created where the confidence intervals of each eigenvalue is calculated and only factors which have the entire confidence interval great than 1.0 is retained [@beran_bootstrap_1985; @beran_correction:_1987; @larsen_estimating_2010]. There is an `R` package that can calculate eignvalue confidence intervals through bootstrapping, I'm not going to cover this in this post but below is an example if you wanted to explore it for yourself. 
+
+```{r, eval=F}
+library(eigenprcomp)
+
+boot_pr_comp(as.matrix(dat.xtab2[,vars]))
+```
+
+2. The selected components should be able to describe at least 80% of the variance. 
+
+If you look at `eig.pca` you'll see that based on these criteria component 1, 2 and 3 are the components to focus on as they are enough to describe the data. While looking at the raw numbers are good, nice visualizations are a bonus. A scree plot displays these data and shows how much variation each component captures from the data. 
+
+```{r,echo=FALSE,fig.width=5,fig.height=4,fig.align='center',fig.cap="Scree plot of eigenvalues for each prinicipal component of `dat.xtab2.pca` with the Kaiser threshold identified."}
+par(family="serif",mar=c(1,1.5,0.1,0.1),oma=c(3,2,0.75,0.5));
+
+ylim.val=c(0,5);by.y=1;ymaj=seq(ylim.val[1],100,by.y);ymin=seq(ylim.val[1],100,by.y/2)
+x=barplot(eig.pca$eig,ylim=ylim.val,col="grey",yaxt="n")
+abline(h=ymaj,lty=3,col="grey")
+x=barplot(eig.pca$eig,ylim=ylim.val,col="grey",yaxt="n",add=T)
+abline(h=1,lty=2,col="red",lwd=2)
+axis_fun(1,line=-0.7,x,x,seq(1,length(x),1),0.7)
+axis_fun(2,ymaj,ymin,ymaj,0.75);box(lwd=1)
+mtext(side=1,line=1.5,"Principal Components")
+mtext(side=2,line=1.5,"Eigenvalue")
+```
+
+
+```{r,echo=FALSE,fig.width=5,fig.height=4,fig.align='center',fig.cap="Scree plot of the variance and cumulative variance for each priniciple compoinent from `dat.xtab2.pca`."}
+par(family="serif",mar=c(1,1.5,0.1,0.1),oma=c(3,2,0.75,0.5));
+
+ylim.val=c(0,105);by.y=25;ymaj=seq(ylim.val[1],100,by.y);ymin=seq(ylim.val[1],100,by.y/2);#set y limit and delineates the major and minor ticks
+x=barplot(eig.pca$variance,ylim=ylim.val,col="white",border=0,yaxt="n")# inital plot to get the measurements
+abline(h=ymaj,lty=3,col="grey")#makes vertical lines from y axis
+x=barplot(eig.pca$variance,ylim=ylim.val,col="grey",yaxt="n",add=T)# the real plot that matters
+lines(x,eig.pca$cumvariance,col="indianred1",lwd=2)# adds the cumulative variance for each factor
+points(x,eig.pca$cumvariance,pch=21,bg="indianred1",cex=1.25)
+abline(h=80,lty=2,col="red",lwd=2)
+axis_fun(1,x,x,seq(1,length(x),1),1)
+axis_fun(2,ymaj,ymin,ymaj,0.75);box(lwd=1)
+mtext(side=1,line=1.5,"Principal Components")
+mtext(side=2,line=2,"Percentage of Variances")
+legend.text=c("Absolute","Cumulative");#helper vaiable for legend
+pt.col=c("grey","indianred1")#helper vaiable for legend
+legend("topleft",legend=legend.text,pch=c(22,21),pt.bg=pt.col,col=c("black",pt.col[2]),lty=c(0,1),lwd=1.5,pt.cex=1.5,ncol=2,cex=1,bty="n",y.intersp=1,x.intersp=0.75,xpd=NA,xjust=0.5,text.col="white")
+legend("topleft",legend=legend.text,pch=c(22,21),pt.bg=pt.col,col="black",lty=0,lwd=0.5,pt.cex=1.55,ncol=2,cex=1,bty="n",y.intersp=1,x.intersp=0.75,xpd=NA,xjust=0.5)
+
+```
+
+Now that we know which components are important, lets put together our biplot and extract components (if needed). To extract out components and specific loadings we can use the `scores()` function in the `vegan` package. It is a generic function to extract scores from `vegan` oridination objects such as RDA, CCA, etc. This function also seems to work with `prcomp` and `princomp` PCA functions in `stats` package.
+
+```{r}
+scrs=scores(dat.xtab2.pca,display=c("sites","species"),choices=c(1,2,3));
+```
+
+`scrs` is a list of two item, species and sites. Species corresponds to the columns of the data and sites correspond to the rows. Use `choices` to extract the components you want, in this case we want the first three components. Now we can plot the scores.
+
+
+```{r,echo=FALSE,fig.width=8,fig.height=4,fig.align='center',fig.cap="PCA biplot of two component comparisons from the `data.xtab2.pca` analysis."}
+
+par(family="serif",mar=c(1,3,0.1,0.5),oma=c(3,1.5,0.75,0.5));
+layout(matrix(1:2,1,2))
+
+xlim.val=c(-0.5,1);by.x=0.5;xmaj=c(0,seq(xlim.val[1],xlim.val[2],by.x));xmin=seq(xlim.val[1],xlim.val[2],by.x/2);
+ylim.val=c(-0.5,1);by.y=0.5;ymaj=c(0,seq(ylim.val[1],ylim.val[2],by.y));ymin=seq(ylim.val[1],ylim.val[2],by.y/2);
+plot(xlim.val,ylim.val,type="n",yaxt="n",xaxt="n",ylab=NA,xlab=NA);
+abline(h=0,v=0,lty=3,col="grey");
+points(scrs$sites[,c(1,2)],pch=21,bg="grey",cex=1,lwd=0.5); #plots the points
+#arrows(0,0,scrs$species[,1],scrs$species[,2],length = 0.05, angle = 15, code = 2,col="indianred1",lwd=1.5);# makes the arrows
+#with(scrs,text(species[,1]-0.1,species[,2],labels=rownames(species),cex=0.75));#adds labels to the arrows; 
+axis_fun(1,line=-0.5,xmaj,xmin,format(xmaj),1); #adds x axis ticks
+axis_fun(2,ymaj,ymin,format(ymaj),1); #adds y axis ticks
+mtext(side=1,line=1.8,paste0("PCA 1 (",round(eig.pca$variance[1],1),"%)"));#adds x axis label with percent variance
+mtext(side=2,line=2.25,paste0("PCA 2 (",round(eig.pca$variance[2],1),"%)"));#adds y axis label with percent variance
+
+
+xlim.val=c(-1,1.5);by.x=0.5;xmaj=c(0,seq(xlim.val[1],xlim.val[2],by.x));xmin=seq(xlim.val[1],xlim.val[2],by.x/2);
+ylim.val=c(-1.5,1.5);by.y=0.5;ymaj=c(0,seq(ylim.val[1],ylim.val[2],by.y));ymin=seq(ylim.val[1],ylim.val[2],by.y/2);
+
+plot(xlim.val,ylim.val,type="n",yaxt="n",xaxt="n",ylab=NA,xlab=NA);
+abline(h=0,v=0,lty=3,col="grey");
+points(scrs$sites[,c(1,3)],pch=21,bg="grey",cex=1,lwd=0.5); 
+axis_fun(1,line=-0.5,xmaj,xmin,format(xmaj),1); 
+axis_fun(2,ymaj,ymin,format(ymaj),1); 
+mtext(side=1,line=1.8,paste0("PCA 1 (",round(eig.pca$variance[1],1),"%)"));
+mtext(side=2,line=2.25,paste0("PCA 3 (",round(eig.pca$variance[3],1),"%)"));
+```
+
+Typically when you see a PCA biplot, you also see arrows of each variable. This is commonly called loadings and can interpreted as:
+
+* When two vectors are close, forming a small angle, the variables are typically positively correlated.
+
+* If two vectors are at an angle 90$^\circ$ they are typically not correlated. 
+
+* If two vectors are at a large angle say in the vicinity of 180$^\circ$ they are typically negatively correlated. 
+
+```{r,echo=FALSE,fig.width=8,fig.height=4,fig.align='center',fig.cap="PCA biplot of two component comparisons from the `data.xtab2.pca` analysis with rescaled loadings."}
+
+par(family="serif",mar=c(1,3,0.1,0.5),oma=c(3,1.5,0.75,0.5));
+layout(matrix(1:2,1,2))
+
+labs=c("Alk","Cl","Chl-a","DO","pH","SRP","TP","TN","DIN")
+xlim.val=c(-0.5,1);by.x=0.5;xmaj=c(0,seq(xlim.val[1],xlim.val[2],by.x));xmin=seq(xlim.val[1],xlim.val[2],by.x/2);
+ylim.val=c(-0.5,1);by.y=0.5;ymaj=c(0,seq(ylim.val[1],ylim.val[2],by.y));ymin=seq(ylim.val[1],ylim.val[2],by.y/2);
+plot(xlim.val,ylim.val,type="n",yaxt="n",xaxt="n",ylab=NA,xlab=NA);
+abline(h=0,v=0,lty=3,col="grey");
+points(scrs$sites[,c(1,2)],pch=21,bg=adjustcolor("grey",0.25),col=adjustcolor("grey",0.75),cex=1,lwd=0.01); #plots the points
+arrows(0,0,scrs$species[,1]/3,scrs$species[,2]/3,length = 0.05, angle = 15, code = 2,col="indianred1",lwd=1.5);# makes the arrows
+with(scrs,text((species[,1]+0.15)/3,species[,2]/3,labels=labs,cex=0.75,font=3));#adds labels to the arrows; 
+axis_fun(1,line=-0.5,xmaj,xmin,format(xmaj),1); #adds x axis ticks
+axis_fun(2,ymaj,ymin,format(ymaj),1); #adds y axis ticks
+mtext(side=1,line=1.8,paste0("PCA 1 (",round(eig.pca$variance[1],1),"%)"));#adds x axis label with percent variance
+mtext(side=2,line=2.25,paste0("PCA 2 (",round(eig.pca$variance[2],1),"%)"));#adds y axis label with percent variance
+
+
+xlim.val=c(-1,1.5);by.x=0.5;xmaj=c(0,seq(xlim.val[1],xlim.val[2],by.x));xmin=seq(xlim.val[1],xlim.val[2],by.x/2);
+ylim.val=c(-1.5,1.5);by.y=0.5;ymaj=c(0,seq(ylim.val[1],ylim.val[2],by.y));ymin=seq(ylim.val[1],ylim.val[2],by.y/2);
+plot(xlim.val,ylim.val,type="n",yaxt="n",xaxt="n",ylab=NA,xlab=NA);
+abline(h=0,v=0,lty=3,col="grey");
+points(scrs$sites[,c(1,3)],pch=21,bg=adjustcolor("grey",0.25),col=adjustcolor("grey",0.75),cex=1,lwd=0.01); #plots the points
+arrows(0,0,scrs$species[,1]/2,scrs$species[,3]/2,length = 0.05, angle = 15, code = 2,col="indianred1",lwd=1.5);# makes the arrows
+with(scrs,text((species[,1]+0.15)/2,species[,3]/2,labels=labs,cex=0.75,font=3));#adds labels to the arrows; 
+axis_fun(1,line=-0.5,xmaj,xmin,format(xmaj),1); 
+axis_fun(2,ymaj,ymin,format(ymaj),1); 
+mtext(side=1,line=1.8,paste0("PCA 1 (",round(eig.pca$variance[1],1),"%)"));
+mtext(side=2,line=2.25,paste0("PCA 3 (",round(eig.pca$variance[3],1),"%)"));
+```
+
+
+You can take this one even further with by showing how each lake falls in the ordination space by joining the `sites` to the original data frame. This is also how you use the derived components for further analysis.
+
+```{r}
+dat.xtab2=cbind(dat.xtab2,scrs$sites)
+
+head(dat.xtab2)
+```
+
+
+
+```{r,echo=FALSE,fig.width=8,fig.height=4.5,fig.align='center',fig.cap="PCA biplot of two component comparisons from the `data.xtab2.pca` analysis with rescaled loadings and Lakes identified."}
+
+par(family="serif",mar=c(2,3,0.1,0.5),oma=c(1,1.5,0.75,0.5));
+layout(matrix(c(1:2,3,3),2,2,byrow=T),heights=c(1,0.3))
+
+#length(unique(dat.xtab2$LAKE))
+cols=wesanderson::wes_palette("Zissou1",6,"continuous")
+
+labs=c("Alk","Cl","Chl-a","DO","pH","SRP","TP","TN","DIN")
+xlim.val=c(-0.5,1);by.x=0.5;xmaj=c(0,seq(xlim.val[1],xlim.val[2],by.x));xmin=seq(xlim.val[1],xlim.val[2],by.x/2);
+ylim.val=c(-0.5,1);by.y=0.5;ymaj=c(0,seq(ylim.val[1],ylim.val[2],by.y));ymin=seq(ylim.val[1],ylim.val[2],by.y/2);
+plot(xlim.val,ylim.val,type="n",yaxt="n",xaxt="n",ylab=NA,xlab=NA);
+abline(h=0,v=0,lty=3,col="grey");
+for(i in 1:6){
+  with(subset(dat.xtab2,LAKE==unique(dat.xtab2$LAKE)[i]),points(PC1,PC2,pch=21,bg=adjustcolor(cols[i],0.25),col=adjustcolor(cols[i],0.5),lwd=0.1,cex=1.25))
+}
+arrows(0,0,scrs$species[,1]/3,scrs$species[,2]/3,length = 0.05, angle = 15, code = 2,col="indianred1",lwd=1.5);# makes the arrows
+with(scrs,text((species[,1]+0.15)/3,species[,2]/3,labels=labs,cex=0.75,font=3));#adds labels to the arrows; 
+axis_fun(1,line=-0.5,xmaj,xmin,format(xmaj),1); #adds x axis ticks
+axis_fun(2,ymaj,ymin,format(ymaj),1); #adds y axis ticks
+mtext(side=1,line=1.8,paste0("PCA 1 (",round(eig.pca$variance[1],1),"%)"));#adds x axis label with percent variance
+mtext(side=2,line=2.25,paste0("PCA 2 (",round(eig.pca$variance[2],1),"%)"));#adds y axis label with percent variance
+
+
+xlim.val=c(-1,1.5);by.x=0.5;xmaj=c(0,seq(xlim.val[1],xlim.val[2],by.x));xmin=seq(xlim.val[1],xlim.val[2],by.x/2);
+ylim.val=c(-1.5,1.5);by.y=0.5;ymaj=c(0,seq(ylim.val[1],ylim.val[2],by.y));ymin=seq(ylim.val[1],ylim.val[2],by.y/2);
+plot(xlim.val,ylim.val,type="n",yaxt="n",xaxt="n",ylab=NA,xlab=NA);
+abline(h=0,v=0,lty=3,col="grey");
+for(i in 1:6){
+  with(subset(dat.xtab2,LAKE==unique(dat.xtab2$LAKE)[i]),points(PC1,PC3,pch=21,bg=adjustcolor(cols[i],0.25),col=adjustcolor(cols[i],0.5),lwd=0.1,cex=1.25))
+}
+arrows(0,0,scrs$species[,1]/2,scrs$species[,3]/2,length = 0.05, angle = 15, code = 2,col="indianred1",lwd=1.5);# makes the arrows
+with(scrs,text((species[,1]+0.15)/2,species[,3]/2,labels=labs,cex=0.75,font=3));#adds labels to the arrows; 
+axis_fun(1,line=-0.5,xmaj,xmin,format(xmaj),1); 
+axis_fun(2,ymaj,ymin,format(ymaj),1); 
+mtext(side=1,line=1.8,paste0("PCA 1 (",round(eig.pca$variance[1],1),"%)"));
+mtext(side=2,line=2.25,paste0("PCA 3 (",round(eig.pca$variance[3],1),"%)"));
+
+plot(0:1,0:1,axes=F,type="n",ylab=NA,xlab=NA)
+legend(0.5,0,legend=unique(dat.xtab2$LAKE),
+       pch=c(21),
+       col=adjustcolor(cols,0.5),
+       pt.bg=adjustcolor(cols,0.25),
+       lwd=c(0.01),lty=c(NA),pt.cex=1.5,ncol=3,cex=0.75,bty="n",y.intersp=1.75,x.intersp=0.75,xpd=NA,xjust=0.5,yjust=0.1)
+
+```
+
+You can extract a lot of great information from these plots and the underlying component data but immediately we see how the different lakes are group (i.e. Lake Okeechobee is obviously different than the other lakes) and how differently the lakes are loaded with respect to the different variables. Generally this grouping makes sense especially for the lakes to the left of the plot (i.e. East Tohopekaliga, Tohopekaliga, Hatchineha and Kissimmee), these lakes are connected, similar geomorphology, managed in a similar fashion and generally have similar upstream characteristics with shared watersheds. 
+
+I hope this blog post has provided a better appreciation of component analysis in `R`.  This is by no means a comprehensive workflow of component analysis and lots of factors need to be considered during this type of analysis but this only scratches the surface.
+
+<!--
+some of the different background that motivated this post. 
+https://www.statisticssolutions.com/principal-component-analysis-pca/
+
+https://statistics.laerd.com/spss-tutorials/principal-components-analysis-pca-using-spss-statistics.php
+
+https://rpubs.com/jaelison/135029
+
+https://medium.com/@bioturing/how-to-read-pca-biplots-and-scree-plots-186246aae063?
+
+https://medium.com/@bioturing/principal-component-analysis-explained-simply-894e8f6f4bfb
+
+https://ourcodingclub.github.io/2018/05/04/ordination.html
+
+https://www.xlstat.com/en/solutions/features/redundancy-analysis-rda interesting explaination of RDA
+-->
+
+
+
+## References
