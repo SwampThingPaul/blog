@@ -233,9 +233,9 @@ Scree plot of eigenvalues for each prinicipal component of <code>dat.xtab2.pca</
 </p>
 </div>
 <div class="figure" style="text-align: center">
-<img src="{{ site.url }}{{ site.baseurl }}/knitr_files/2019-12-10-PCA_files/figure-html/unnamed-chunk-16-1.png" alt="Scree plot of the variance and cumulative variance for each priniciple compoinent from `dat.xtab2.pca`."  />
+<img src="{{ site.url }}{{ site.baseurl }}/knitr_files/2019-12-10-PCA_files/figure-html/unnamed-chunk-16-1.png" alt="Scree plot of the variance and cumulative variance for each priniciple component from `dat.xtab2.pca`."  />
 <p class="caption">
-Scree plot of the variance and cumulative variance for each priniciple compoinent from <code>dat.xtab2.pca</code>.
+Scree plot of the variance and cumulative variance for each priniciple component from <code>dat.xtab2.pca</code>.
 </p>
 </div>
 <p>Now that we know which components are important, lets put together our biplot and extract components (if needed). To extract out components and specific loadings we can use the <code>scores()</code> function in the <code>vegan</code> package. It is a generic function to extract scores from <code>vegan</code> oridination objects such as RDA, CCA, etc. This function also seems to work with <code>prcomp</code> and <code>princomp</code> PCA functions in <code>stats</code> package.</p>

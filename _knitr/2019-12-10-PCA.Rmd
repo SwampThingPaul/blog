@@ -317,7 +317,7 @@ mtext(side=2,line=1.5,"Eigenvalue")
 ```
 
 
-```{r,echo=FALSE,fig.width=5,fig.height=4,fig.align='center',fig.cap="Scree plot of the variance and cumulative variance for each priniciple compoinent from `dat.xtab2.pca`."}
+```{r,echo=FALSE,fig.width=5,fig.height=4,fig.align='center',fig.cap="Scree plot of the variance and cumulative variance for each priniciple component from `dat.xtab2.pca`."}
 par(family="serif",mar=c(1,1.5,0.1,0.1),oma=c(3,2,0.75,0.5));
 
 ylim.val=c(0,110);by.y=25;ymaj=seq(ylim.val[1],100,by.y);ymin=seq(ylim.val[1],100,by.y/2);#set y limit and delineates the major and minor ticks
