@@ -49,3 +49,5 @@ knit.clean=function(post.name){
 #knit.clean("2019-06-25-DataViz")
 
 #knit.clean("2019-07-09-DataViz")
+
+#knit.clean("2019-12-10-PCA")
