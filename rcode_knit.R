@@ -51,3 +51,5 @@ knit.clean=function(post.name){
 #knit.clean("2019-07-09-DataViz")
 
 #knit.clean("2019-12-10-PCA")
+
+#knit.clean("2020-01-24-Boxplot")
