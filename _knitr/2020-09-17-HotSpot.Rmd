@@ -1,0 +1,353 @@
+---
+title: "Hot Spot Analysis - Geospatial data analysis in #rstats. Part 3"
+date: "September 18,2020"
+output: 
+  prettydoc::html_pretty:
+  theme: default
+highlight: github
+editor_options: 
+  chunk_output_type: console
+bibliography: "getis.bib"
+link-citations: yes
+---
+  
+__Keywords:__ geostatistics, R, hot-spot, Getis-Ord
+
+***
+  
+Continuing our series on geospatial analysis we are diving deeper into spatial statistics Hot-spot analysis. In my prior posts I presented spatial interpolation techniques such as [kriging](https://swampthingpaul.github.io/blog/geospatial-data-analysis-in-rstats.-part-1/){target="_blank"} and spatial auto-correlation with [Moran's *I*](https://swampthingpaul.github.io/blog/geospatial-data-analysis-in-rstats.-part-2/){target="_blank"}. 
+
+Kriging is a value tool to detect spatial structure and patterns across a particular area. These spatial models rely on understanding the spatial correction and auto-correlation. A common component of spatial correlation/auto-correlation analyses is they are applied on a global scale (entire dataset). In some cases, it may be warranted to examine patterns at a more local (fine) scale. The Getis-Ord _G_ statistic provides information on local spatial structures and can identify areas of high (or low) clustering. This clustering is operationally defined as __hotspots__ and is done by comparing the sum in a particular variable within a local neighborhood network relative to the global sum of the area-of-interest extent [@getis_analysis_2010].
+
+@getis_analysis_2010 introduced a family of measures of spatial associated called _G_ statistics. When used with spatial auto-correlation statistics such as Moran's _I_, the _G_ family of statistics can expand our understanding of processes that give rise to spatial association, in detecting local hotspots (in their original paper they used the term "pockets"). The Getis-Ord statistic can be used in the global ($G$) and local ($G_{i}^{*}$) scales. The global statistic ($G$) identifies high or low values across the entire study area (i.e. forest, wetland, city, etc.), meanwhile the local ($G_{i}^{*}$) statistic evaluates the data for each feature within the dataset and determining where features with high or low values ("pockets" or hot/cold) cluster spatially. 
+
+At this point I would probably throw some equations around and give you the mathematical nitty gritty. Given I am not a maths wiz and @getis_analysis_2010 provides all the detail (lots of nitty and a little gritty) in such an eloquent fashion I'll leave it up to you if you want to peruse the manuscript. The Getis-Ord statistic has been applied across several different fields including crime analysis, epidemiology and a couple of forays into biogeochemistry and ecology. 
+
+## Play Time
+
+For this example I will be using a dataset from the United States Environmental Protection Agency (USEPA) as part of the Everglades Regional Environmental Monitoring Program ([R-EMAP](https://www.epa.gov/everglades/environmental-monitoring-everglades){target="_blank"}). 
+
+### Some on the dataset
+
+The Everglades R-EMAP program has been monitoring the Everglades ecosystem since 1993 in a probability-based sampling approach covering ~5000 km<sup>2</sup> from a multi-media aspect (water, sediment, fish, etc.). This large scale sampling has occurred in four phases, Phase I (1995 - 1996), Phase II (1999), Phase III (2005) and Phase IV (2013 - 2014). For the purposes of this post, we will be focusing on sediment/soil total phosphorus concentrations collected during the wet-season sampling during Phase I (April 1995 & May 1996). 
+
+### Analysis time!!
+Here are the necessary packages. 
+```{r libraries,echo=T,message=F,warning=F}
+## Libraries
+# read xlsx files
+library(readxl)
+
+# Geospatial 
+library(rgdal)
+library(rgeos)
+library(raster)
+library(spdep)
+
+```
+
+Incase you are not sure if you have these packages installed here is a quick function that will check for the packages and install if needed from CRAN.
+
+```{r,eval=FALSE}
+# Function
+check.packages <- function(pkg){
+  new.pkg <- pkg[!(pkg %in% installed.packages()[, "Package"])]
+  if (length(new.pkg)) 
+    install.packages(new.pkg, dependencies = TRUE)
+  sapply(pkg, require, character.only = TRUE)
+}
+
+pkg<-c("openxlsx","readxl","rgdal","rgeos","raster","spdep")
+check.packages(pkg)
+```
+
+
+```{r, include=F}
+library(AnalystHelper)
+library(openxlsx)
+#Paths
+wd="C:/Julian_LaCie/Work/REMAP"
+
+paths=paste0(wd,c("/Plots/","/Export/","/Data/","/GIS"))
+#Folder.Maker(paths);#One and done. Creates folders in working directory.
+plot.path=paths[1]
+export.path=paths[2]
+data.path=paths[3]
+GIS.path=paths[4]
+
+gen.gis="C:/Julian_LaCie/_GISData/"
+# GIS ---------------------------------------------------------------------
+utm17=CRS("+proj=utm +zone=17 +datum=WGS84 +units=m")
+wgs84=CRS("+proj=longlat +datum=WGS84 +no_defs +ellps=WGS84 +towgs84=0,0,0")
+
+#ogrListLayers(paste0(gen.gis,"SFER_GIS_Geodatabase.gdb"))
+canal=spTransform(readOGR(paste0(gen.gis,"SFER_GIS_Geodatabase.gdb"),"SFWMD_Canals"),utm17)
+wcas=spTransform(readOGR(paste0(gen.gis,"SFER_GIS_Geodatabase.gdb"),"WCAs"),utm17)
+# writeOGR(wcas,"C:/Julian_LaCie/_Github/blog/data/hotspot","WCAs",driver="ESRI Shapefile")
+enp=spTransform(readOGR(paste0(gen.gis,"SFER_GIS_Geodatabase.gdb"),"ENP"),utm17)
+
+p12=readxl::read_xls(paste0(data.path,"P12/P12join7FINAL.xls"),sheet=2)
+colnames(p12)=sapply(strsplit(names(p12),"\\$"),"[",1);#removes "$" in column name
+p12=data.frame(p12)
+p12$DATE=date.fun(convertToDate(p12$DATE))
+p12=subset(p12,is.na(DECLONG)==F|is.na(DECLAT)==F)
+p12[p12==-9999]<-NA
+p12[p12==-3047.6952]<-NA
+
+vars=c("STA_ID","CYCLE","SUBAREA","DECLONG","DECLAT","DATE","TPSDF")
+p12.shp=SpatialPointsDataFrame(coords=p12[,c("DECLONG","DECLAT")],
+                               data=p12[,vars],proj4string =wgs84)
+p12.shp=spTransform(p12.shp,utm17)
+
+p12.shp.wca2=subset(p12.shp,SUBAREA=="WCA2"&CYCLE%in%c(0,2))
+p12.shp.wca2=p12.shp.wca2[subset(wcas,Name=="WCA 2A"),]
+```
+
+Download the data (as a zip file) [here](https://www.epa.gov/sites/production/files/2014-03/sf1data.zip){target="_blank"}! 
+
+Download the Water Conservation Area shapefile [here]("https://www.swampthingecology.org/blog/data/hotspot/WCAs.zip"){target="_blank}! 
+
+```{r,eval=F}
+# Read shapefile
+wcas<-readOGR(GISdata,"WCAs")
+wcas<-spTransform(wcas,utm17)
+
+# Read the spreadsheet
+p12<-readxl::read_xls("data/P12join7FINAL.xls",sheet=2)
+
+# Clean up the headers
+colnames(p12)<-sapply(strsplit(names(p12),"\\$"),"[",1)
+p12<-data.frame(p12)
+p12[p12==-9999]<-NA
+p12[p12==-3047.6952]<-NA
+
+# Convert the data.frame() to SpatialPointsDataFrame
+vars<-c("STA_ID","CYCLE","SUBAREA","DECLONG","DECLAT","DATE","TPSDF")
+p12.shp<-SpatialPointsDataFrame(coords=p12[,c("DECLONG","DECLAT")],
+                               data=p12[,vars],proj4string =wgs84)
+# transform to UTM (something I like to do...but not necessary)
+p12.shp<-spTransform(p12.shp,utm17)
+
+# Subset the data for wet season data only
+p12.shp.wca2<-subset(p12.shp,CYCLE%in%c(0,2))
+p12.shp.wca2<-p12.shp.wca2[subset(wcas,Name=="WCA 2A"),]
+```
+
+Here is a quick map the of data
+```{r,echo=T,message=F,warning=F,fig.height=4,fig.width=5,fig.align="center"}
+par(mar=c(0.1,0.1,0.1,0.1),oma=c(0,0,0,0))
+plot(p12.shp,pch=21,bg="grey",cex=0.5)
+plot(wcas,add=T)
+```
+
+Much like other spatial statistics (i.e. Moran's _I_) the _G_ statistics relies on spatially weighting the data. In my last [post](https://swampthingpaul.github.io/blog/geospatial-data-analysis-in-rstats.-part-2/){target="_blank"} we discussed average nearest neighbor (ANN). Average nearest neighbor analysis measures the average distance from each point in the area of interest to it nearest point. As a reminder here is changes in ANN versus the degree of clustering. Here is a quick reminder.
+
+```{r f11-diff-patterns, fig.cap="Three different point patterns: a single cluster (top left), a dual cluster (top center) and a randomly scattered pattern (top right). Three different ANN vs. neighbor order plots. The black ANN line is for the first point pattern (single cluster); the blue line is for the second point pattern (double cluster) and the red line is for the third point pattern.", fig.height=4.25, fig.width=5.5,fig.align="center", echo=FALSE,message=F,warning=F}
+library(spatstat)
+win = owin(c(0,10),c(0,10))
+
+set.seed(12)
+x = rnorm(20, 5,0.3)
+set.seed(14)
+y = rnorm(20,5,0.3)
+P.cl = ppp(x,y,window=win)
+
+set.seed(6)
+x = c(rnorm(10, 3,0.5), rnorm(10,6,0.5))
+set.seed(34)
+y = c(rnorm(10, 3,0.5), rnorm(10,6,0.5))
+P.cl2 = ppp(x,y,window=win)
+
+set.seed(673)
+P.rnd = rpoint(20, win=win)
+
+ann.cl = apply(nndist(P.cl, k=1:(P.cl$n-1)),2,FUN=mean)
+ann.cl2 = apply(nndist(P.cl2, k=1:(P.cl2$n-1)),2,FUN=mean)
+ann.rnd = apply(nndist(P.rnd, k=1:(P.rnd$n-1)),2,FUN=mean)
+
+par(family="serif",mar=c(1.5,2,1,0.5),oma=c(2,2,0.25,0.5));
+layout(matrix(c(1:3,4,4,4),2,3,byrow=T))
+plot(y~x,P.cl, pch=21,bg="grey", main="",ylim=c(0,10),xlim=c(0,10),yaxt="n",xaxt="n",ylab=NA,xlab=NA,type="n")
+with(P.cl,points(x,y,pch=21,bg="grey",lwd=0.05,cex=1.5))
+mtext(side=3,"Clustered")
+ 
+plot(y~x,P.cl, pch=21,bg="grey", main="",ylim=c(0,10),xlim=c(0,10),yaxt="n",xaxt="n",ylab=NA,xlab=NA,type="n")
+with(P.cl2,points(x,y,pch=21,bg="dodgerblue1",lwd=0.05,cex=1.5))
+ 
+plot(y~x,P.cl, pch=21,bg="grey", main="",ylim=c(0,10),xlim=c(0,10),yaxt="n",xaxt="n",ylab=NA,xlab=NA,type="n")
+with(P.rnd,points(x,y,pch=21,bg="indianred1",lwd=0.05,cex=1.5))
+mtext(side=3,"Dispersed")
+
+ylim.val=c(0, 10);by.y=2;ymaj=seq(ylim.val[1],ylim.val[2],by.y);ymin=seq(ylim.val[1],ylim.val[2],by.y/2)
+xlim.val=c(0,20);by.x=5;xmaj=seq(xlim.val[1],xlim.val[2],by.x);xmin=seq(xlim.val[1],xlim.val[2],by.x/by.x)
+
+
+plot(1:19, ann.cl, type="n", ylim=ylim.val,xlim=xlim.val,xaxt="n",yaxt="n",xlab=NA, ylab=NA)
+abline(h=ymaj,v=xmaj,lty=3,col="grey")
+pt_line(1:19,ann.cl,1,"grey",1,21,"grey")
+pt_line(1:19,ann.cl2,1,"dodgerblue1",1,21,"dodgerblue1")
+pt_line(1:19,ann.rnd,1,"indianred1",1,21,"indianred1")
+axis_fun(1,xmaj,xmin,xmaj,1)
+axis_fun(2,ymaj,ymin,ymaj,1)
+mtext(side=1,line=2,"Neighbor order")
+mtext(side=2,line=2, "ANN")
+```
+
+
+For demonstration purposes we are going to look at a subset of the entire datsaset. We are going to look at data within Water Conservation Area 2A.
+
+```{r,echo=F,message=F,warning=F,fig.height=4,fig.width=5,fig.align="center",fig.cap="Soil total phosphorus concentration within Water Conservation Area 2A during Phase I sampling."}
+# library(classInt)
+# int=classIntervals(p12.shp.wca2$TPSDF,n=5,style="equal")
+# int$brks
+int=c(0,200,400,500,600,800,1000,1200,1600)
+pal=hcl.colors(length(int)-1, "Inferno", rev = F,alpha=0.7)
+cols.val=findInterval(p12.shp.wca2$TPSDF,int)
+
+par(family="serif",oma=c(0.5,0.5,0.5,0.5),mar=c(0.1,0.1,0.1,0.1))
+layout(matrix(c(1:2),1,2,byrow=T),widths = c(1,0.5))
+bbox.lims=bbox(gBuffer(subset(wcas,Name=="WCA 2A"),width=1000))
+plot(wcas,ylim=bbox.lims[c(2,4)],xlim=bbox.lims[c(1,3)],lwd=0.05)
+plot(p12.shp.wca2,pch=21,bg=pal[cols.val],add=T,cex=2)
+mapmisc::scaleBar(utm17,"bottomright",bty="n",cex=1,seg.len=4)
+
+plot(0:1,0:1,ann=F,axes=F,type="n")
+n=length(int)-1
+labs=c("< 200","200 - 400","400 - 500","500 - 600","600 - 800","800 - 1000","1000 - 1200","> 1200")#NA
+#for(i in 1:n){labs[i]=paste(format(round(int.bks[i],2),nsmall=2),format(round(int.bks[i+1],2),nsmall=2),sep=" - ")}
+bx.val= seq(0.4,0.85,(0.85-0.4)/n)
+rect(0.15,bx.val[1:n],0.25,bx.val[2:(n+1)],col=rev(pal),lty=0)
+text(x=0.25, y = bx.val[2:(n+1)]-c(mean(diff(bx.val[2:(n+1)]))/2), labels = rev(labs),cex=0.6,adj=0,pos=4)
+text(x=0.15,y=0.95,"Soil TP Concentration\n(mg kg\u207B\u00B9)",adj=0,cex=0.75)
+```
+
+Most examples of Getis-Ord analysis across the interest looks at polygon type data (i.e. city block, counties, watersheds, etc.). For this example, we are evaluating the data based on point data. 
+
+Let's determine the spatial weight (nearest neighbor distances). Since we are looking at point data, we are going to need to do something slightly different than what was done with Moran's _I_ in the prior post. The `dnearneigh()` uses a matrix of point coordinates combined with distance thresholds. To work with the function coordinates will need to be extracted from the data using `coordinates()`. To find the distance range in the data we can use `pointDistance()` function. We don't want to include all possible connections so setting the upper distance bound in the `dnearneigh()` to the mean distance across the site.
+
+```{r}
+# Find distance range
+ptdist=pointDistance(p12.shp.wca2)
+
+min.dist<-min(ptdist); # Minimum
+mean.dist<-mean(ptdist); # Max
+
+nb<-dnearneigh(coordinates(p12.shp.wca2),min.dist,mean.dist)
+
+```
+
+```{r,fig.height=4,fig.width=3,echo=F,message=F,warning=F,fig.align="center",fig.cap="Neighborhood network for WCA-2A sites"}
+par(family="serif",oma=c(0.5,0.5,0.5,0.5),mar=c(0.1,0.1,0.1,0.1))
+
+bbox.lims<-bbox(gBuffer(subset(wcas,Name=="WCA 2A"),width=1000))
+plot(wcas,ylim=bbox.lims[c(2,4)],xlim=bbox.lims[c(1,3)],lwd=0.05,col="grey90")
+plot(nb,coordinates(p12.shp.wca2),col="red",lwd=0.8,add=T)
+plot(p12.shp.wca2,pch=21,bg="white",add=T,cex=1.5)
+
+```
+
+Another spatial weights approach could be to apply k-nearest neighbor distances and could be used in the `nb2listw()`. In general there are minor differences in how these spatial weights are calculated and can be data specific. For purposes of our example we will be using euclidean distance (above) but for completeness below is the k-nearest neighbor approach.  
+```{r,eval=F}
+k1<-knn2nb(knearneigh(p12.shp.wca2))
+```
+
+
+#### Global _G_
+Now that we have the nearest neighbor values we need to convert the data into a list for both the global and local _G_ statistics. For the global _G_ (`globalG.test(...)`), it is recommended that the spatial weights be binary, therefore in the `nb2listw()` function we need to use the `style="B"`. 
+
+```{r}
+nb_lw<-nb2listw(nb,style="B")
+```
+
+Now to evaluate the dataset from the Global _G_ statistic. 
+```{r}
+globalG.test(p12.shp.wca2$TPSDF,nb_lw,alternative="two.sided")
+```
+
+In the output it `standard deviate` is the standard deviation of Moran's _I_ or the $z_{G}$-score and $\rho$-value of the test. Other information in the output include the observed statistic, its expectation and variance. 
+
+Based on the Global _G_ results it suggests that there is no high/low clustering globally across the dataset. 
+
+If you want more information on the Global test, [ESRI](https://www.esri.com/en-us/home){target="_blank"} provides a [robust review](https://pro.arcgis.com/en/pro-app/tool-reference/spatial-statistics/h-how-high-low-clustering-getis-ord-general-g-spat.htm){target="_blank"} including all the additional [maths](https://pro.arcgis.com/en/pro-app/tool-reference/spatial-statistics/h-general-g-additional-math.htm){target="_blank"} that is behind the statistic. 
+
+#### Local _G_
+
+Similar to the Global test, the local _G_ test uses nearest neighbors. Unlike the Global test, the nearest neighbor can be row standardized (default setting). 
+
+```{r}
+nb_lw<-nb2listw(nb)
+
+# local G
+local_g<-localG(p12.shp.wca2$TPSDF,nb_lw)
+```
+
+The output of the function is a list of $z_{G_{i}^{*}}$-scores for each site. A little extra coding to determine $\rho$-values and hot/cold spots. Essentially values need to be extracted from the `local_g` object and $\rho$-value based on the z-score. 
+
+```{r}
+# convert to matrix
+local_g.ma=as.matrix(local_g)
+
+# column-bind the local_g data
+p12.shp.wca2<-cbind(p12.shp.wca2,local_g.ma)
+
+# change the names of the new column
+names(p12.shp.wca2)[ncol(p12.shp.wca2)]="localg"
+
+```
+
+Lets determine the `two.side` $\rho$-value.
+```{r}
+p12.shp.wca2$pval<- 2*pnorm(-abs(p12.shp.wca2$localg))
+```
+
+Based on the $z_{G_{i}^{*}}$-scores and $\rho$-value we operationally define a hotspot as  $z_{G_{i}^{*}}$-scores > 0 and $\rho$-value < $\alpha$ (usually 0.05). Let see if we have hotspots. 
+
+```{r}
+subset(p12.shp.wca2@data,localg>0&pval<0.05)$STA_ID
+```
+
+We have one site identified as a hotspot. Lets maps it out too.
+
+```{r,echo=F,message=F,warning=F,fig.height=4,fig.width=5,fig.align="center",fig.cap="Soil total phosphorus hotspots identified using the Getis-Ord $G_{i}^{*}$ spatial statistic."}
+# library(classInt)
+# int=classIntervals(p12.shp.wca2$localg,breaks,)
+# int$brks
+int=c(-3,-2,-1,0,1,2,3)
+pal=hcl.colors(length(int)-1, "viridis", rev = F,alpha=0.7)
+cols.val=findInterval(p12.shp.wca2$localg,int)
+pch.vals=with(p12.shp.wca2@data,ifelse(pval<0.05,21,22))
+cex.vals=with(p12.shp.wca2@data,ifelse(pval<0.05,2.5,1.5))
+
+par(family="serif",oma=c(0.5,0.5,0.5,0.5),mar=c(0.1,0.1,0.1,0.1))
+layout(matrix(c(1:2),1,2,byrow=T),widths = c(1,0.5))
+bbox.lims=bbox(gBuffer(subset(wcas,Name=="WCA 2A"),width=1000))
+plot(wcas,ylim=bbox.lims[c(2,4)],xlim=bbox.lims[c(1,3)],lwd=0.05)
+plot(p12.shp.wca2,pch=pch.vals,bg=pal[cols.val],cex=cex.vals,add=T)
+mapmisc::scaleBar(utm17,"bottomright",bty="n",cex=1,seg.len=4)
+
+plot(0:1,0:1,ann=F,axes=F,type="n")
+n=length(int)-1
+labs=c("< -2.0","-2.0 - -1.0","-1.0 - 0.0","0.0 - 1.0", "1.0 - 2.0","> 2.0")#NA
+#for(i in 1:n){labs[i]=paste(format(round(int.bks[i],2),nsmall=2),format(round(int.bks[i+1],2),nsmall=2),sep=" - ")}
+bx.val= seq(0.4,0.85,(0.85-0.4)/n)
+rect(0.15,bx.val[1:n],0.25,bx.val[2:(n+1)],col=rev(pal),lty=0)
+text(x=0.25, y = bx.val[2:(n+1)]-c(mean(diff(bx.val[2:(n+1)]))/2), labels = rev(labs),cex=0.75,adj=0,pos=4)
+text(x=0.15,y=0.90,expression(paste("Local Getis-Ord G"["i"]^"*")),adj=0,cex=1)
+
+legend(0.5,0.4,legend=c("< 0.05"," > 0.05"),pch=c(21,22),lty=c(NA),lwd=c(0.1),
+       pt.bg="grey",pt.cex=c(2.5,1.5),ncol=1,cex=1,bty="n",y.intersp=1,x.intersp=0.75,xpd=NA,xjust=0.5,yjust=1,
+       title="\u03C1-value",title.adj = 0)
+```
+
+For context, this soil TP hotspot occurs near discharge locations into Water Conservation Area 2A. Historically run-off from the upstream agricultural area would be diverted to the area to protection both the agricultural area and the downstream urban areas. Currently restoration activities has eliminated these direct discharge and water quality has improved. However, we still see the legacy affect from past water management. If your interested in how the system is responding check out the [South Florida Environmental Report](https://www.sfwmd.gov/science-data/scientific-publications-sfer){target="_blank"} here is last years [Everglades Water Quality](https://apps.sfwmd.gov/sfwmd/SFER/2020_sfer_final/v1/chapters/v1_ch3a.pdf){target="_blank"} chapter. 
+
+If you would like more background on hotspot analysis, ESRI produces a pretty good resource on [Getis-Ord $G_{i}^{*}$](https://pro.arcgis.com/en/pro-app/tool-reference/spatial-statistics/h-how-hot-spot-analysis-getis-ord-gi-spatial-stati.htm){target="_blank"}. 
+
+This analysis can also be spatially aggregated (from ESRI) in the R by creating a grid, aggregating the data, estimate the nearest neighbor and evaluating on a local or global scale (maybe we will get to that another time). 
+
+```{r ,out.width="75%",fig.align="center",echo=F}
+knitr::include_graphics("https://pro.arcgis.com/en/pro-app/tool-reference/spatial-statistics/GUID-D66FFAA9-4DA8-4883-960F-A807F32CF89D-web.png")
+```
+
+***
+
