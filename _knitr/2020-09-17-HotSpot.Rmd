@@ -108,6 +108,10 @@ Download the data (as a zip file) [here](https://www.epa.gov/sites/production/fi
 Download the Water Conservation Area shapefile [here]("https://www.swampthingecology.org/blog/data/hotspot/WCAs.zip"){target="_blank}! 
 
 ```{r,eval=F}
+# Define spatial datum
+utm17<-CRS("+proj=utm +zone=17 +datum=WGS84 +units=m")
+wgs84<-CRS("+proj=longlat +datum=WGS84 +no_defs +ellps=WGS84 +towgs84=0,0,0")
+
 # Read shapefile
 wcas<-readOGR(GISdata,"WCAs")
 wcas<-spTransform(wcas,utm17)

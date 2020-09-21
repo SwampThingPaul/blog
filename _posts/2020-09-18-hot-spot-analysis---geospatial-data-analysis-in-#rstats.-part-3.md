@@ -46,29 +46,33 @@ layout: post
 <a class="sourceLine" id="cb2-10" title="10"><span class="kw">check.packages</span>(pkg)</a></code></pre></div>
 <p>Download the data (as a zip file) <a href="https://www.epa.gov/sites/production/files/2014-03/sf1data.zip" target="_blank">here</a>!</p>
 <p>Download the Water Conservation Area shapefile <a href="%22https://www.swampthingecology.org/blog/data/hotspot/WCAs.zip%22" target="&quot;_blank">here</a>!</p>
-<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb3-1" title="1"><span class="co"># Read shapefile</span></a>
-<a class="sourceLine" id="cb3-2" title="2">wcas&lt;-<span class="kw">readOGR</span>(GISdata,<span class="st">&quot;WCAs&quot;</span>)</a>
-<a class="sourceLine" id="cb3-3" title="3">wcas&lt;-<span class="kw">spTransform</span>(wcas,utm17)</a>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb3-1" title="1"><span class="co"># Define spatial datum</span></a>
+<a class="sourceLine" id="cb3-2" title="2">utm17&lt;-<span class="kw">CRS</span>(<span class="st">&quot;+proj=utm +zone=17 +datum=WGS84 +units=m&quot;</span>)</a>
+<a class="sourceLine" id="cb3-3" title="3">wgs84&lt;-<span class="kw">CRS</span>(<span class="st">&quot;+proj=longlat +datum=WGS84 +no_defs +ellps=WGS84 +towgs84=0,0,0&quot;</span>)</a>
 <a class="sourceLine" id="cb3-4" title="4"></a>
-<a class="sourceLine" id="cb3-5" title="5"><span class="co"># Read the spreadsheet</span></a>
-<a class="sourceLine" id="cb3-6" title="6">p12&lt;-readxl<span class="op">::</span><span class="kw">read_xls</span>(<span class="st">&quot;data/P12join7FINAL.xls&quot;</span>,<span class="dt">sheet=</span><span class="dv">2</span>)</a>
-<a class="sourceLine" id="cb3-7" title="7"></a>
-<a class="sourceLine" id="cb3-8" title="8"><span class="co"># Clean up the headers</span></a>
-<a class="sourceLine" id="cb3-9" title="9"><span class="kw">colnames</span>(p12)&lt;-<span class="kw">sapply</span>(<span class="kw">strsplit</span>(<span class="kw">names</span>(p12),<span class="st">&quot;</span><span class="ch">\\</span><span class="st">$&quot;</span>),<span class="st">&quot;[&quot;</span>,<span class="dv">1</span>)</a>
-<a class="sourceLine" id="cb3-10" title="10">p12&lt;-<span class="kw">data.frame</span>(p12)</a>
-<a class="sourceLine" id="cb3-11" title="11">p12[p12<span class="op">==-</span><span class="dv">9999</span>]&lt;-<span class="ot">NA</span></a>
-<a class="sourceLine" id="cb3-12" title="12">p12[p12<span class="op">==-</span><span class="fl">3047.6952</span>]&lt;-<span class="ot">NA</span></a>
-<a class="sourceLine" id="cb3-13" title="13"></a>
-<a class="sourceLine" id="cb3-14" title="14"><span class="co"># Convert the data.frame() to SpatialPointsDataFrame</span></a>
-<a class="sourceLine" id="cb3-15" title="15">vars&lt;-<span class="kw">c</span>(<span class="st">&quot;STA_ID&quot;</span>,<span class="st">&quot;CYCLE&quot;</span>,<span class="st">&quot;SUBAREA&quot;</span>,<span class="st">&quot;DECLONG&quot;</span>,<span class="st">&quot;DECLAT&quot;</span>,<span class="st">&quot;DATE&quot;</span>,<span class="st">&quot;TPSDF&quot;</span>)</a>
-<a class="sourceLine" id="cb3-16" title="16">p12.shp&lt;-<span class="kw">SpatialPointsDataFrame</span>(<span class="dt">coords=</span>p12[,<span class="kw">c</span>(<span class="st">&quot;DECLONG&quot;</span>,<span class="st">&quot;DECLAT&quot;</span>)],</a>
-<a class="sourceLine" id="cb3-17" title="17">                               <span class="dt">data=</span>p12[,vars],<span class="dt">proj4string =</span>wgs84)</a>
-<a class="sourceLine" id="cb3-18" title="18"><span class="co"># transform to UTM (something I like to do...but not necessary)</span></a>
-<a class="sourceLine" id="cb3-19" title="19">p12.shp&lt;-<span class="kw">spTransform</span>(p12.shp,utm17)</a>
-<a class="sourceLine" id="cb3-20" title="20"></a>
-<a class="sourceLine" id="cb3-21" title="21"><span class="co"># Subset the data for wet season data only</span></a>
-<a class="sourceLine" id="cb3-22" title="22">p12.shp.wca2&lt;-<span class="kw">subset</span>(p12.shp,CYCLE<span class="op">%in%</span><span class="kw">c</span>(<span class="dv">0</span>,<span class="dv">2</span>))</a>
-<a class="sourceLine" id="cb3-23" title="23">p12.shp.wca2&lt;-p12.shp.wca2[<span class="kw">subset</span>(wcas,Name<span class="op">==</span><span class="st">&quot;WCA 2A&quot;</span>),]</a></code></pre></div>
+<a class="sourceLine" id="cb3-5" title="5"><span class="co"># Read shapefile</span></a>
+<a class="sourceLine" id="cb3-6" title="6">wcas&lt;-<span class="kw">readOGR</span>(GISdata,<span class="st">&quot;WCAs&quot;</span>)</a>
+<a class="sourceLine" id="cb3-7" title="7">wcas&lt;-<span class="kw">spTransform</span>(wcas,utm17)</a>
+<a class="sourceLine" id="cb3-8" title="8"></a>
+<a class="sourceLine" id="cb3-9" title="9"><span class="co"># Read the spreadsheet</span></a>
+<a class="sourceLine" id="cb3-10" title="10">p12&lt;-readxl<span class="op">::</span><span class="kw">read_xls</span>(<span class="st">&quot;data/P12join7FINAL.xls&quot;</span>,<span class="dt">sheet=</span><span class="dv">2</span>)</a>
+<a class="sourceLine" id="cb3-11" title="11"></a>
+<a class="sourceLine" id="cb3-12" title="12"><span class="co"># Clean up the headers</span></a>
+<a class="sourceLine" id="cb3-13" title="13"><span class="kw">colnames</span>(p12)&lt;-<span class="kw">sapply</span>(<span class="kw">strsplit</span>(<span class="kw">names</span>(p12),<span class="st">&quot;</span><span class="ch">\\</span><span class="st">$&quot;</span>),<span class="st">&quot;[&quot;</span>,<span class="dv">1</span>)</a>
+<a class="sourceLine" id="cb3-14" title="14">p12&lt;-<span class="kw">data.frame</span>(p12)</a>
+<a class="sourceLine" id="cb3-15" title="15">p12[p12<span class="op">==-</span><span class="dv">9999</span>]&lt;-<span class="ot">NA</span></a>
+<a class="sourceLine" id="cb3-16" title="16">p12[p12<span class="op">==-</span><span class="fl">3047.6952</span>]&lt;-<span class="ot">NA</span></a>
+<a class="sourceLine" id="cb3-17" title="17"></a>
+<a class="sourceLine" id="cb3-18" title="18"><span class="co"># Convert the data.frame() to SpatialPointsDataFrame</span></a>
+<a class="sourceLine" id="cb3-19" title="19">vars&lt;-<span class="kw">c</span>(<span class="st">&quot;STA_ID&quot;</span>,<span class="st">&quot;CYCLE&quot;</span>,<span class="st">&quot;SUBAREA&quot;</span>,<span class="st">&quot;DECLONG&quot;</span>,<span class="st">&quot;DECLAT&quot;</span>,<span class="st">&quot;DATE&quot;</span>,<span class="st">&quot;TPSDF&quot;</span>)</a>
+<a class="sourceLine" id="cb3-20" title="20">p12.shp&lt;-<span class="kw">SpatialPointsDataFrame</span>(<span class="dt">coords=</span>p12[,<span class="kw">c</span>(<span class="st">&quot;DECLONG&quot;</span>,<span class="st">&quot;DECLAT&quot;</span>)],</a>
+<a class="sourceLine" id="cb3-21" title="21">                               <span class="dt">data=</span>p12[,vars],<span class="dt">proj4string =</span>wgs84)</a>
+<a class="sourceLine" id="cb3-22" title="22"><span class="co"># transform to UTM (something I like to do...but not necessary)</span></a>
+<a class="sourceLine" id="cb3-23" title="23">p12.shp&lt;-<span class="kw">spTransform</span>(p12.shp,utm17)</a>
+<a class="sourceLine" id="cb3-24" title="24"></a>
+<a class="sourceLine" id="cb3-25" title="25"><span class="co"># Subset the data for wet season data only</span></a>
+<a class="sourceLine" id="cb3-26" title="26">p12.shp.wca2&lt;-<span class="kw">subset</span>(p12.shp,CYCLE<span class="op">%in%</span><span class="kw">c</span>(<span class="dv">0</span>,<span class="dv">2</span>))</a>
+<a class="sourceLine" id="cb3-27" title="27">p12.shp.wca2&lt;-p12.shp.wca2[<span class="kw">subset</span>(wcas,Name<span class="op">==</span><span class="st">&quot;WCA 2A&quot;</span>),]</a></code></pre></div>
 <p>Here is a quick map the of data</p>
 <div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb4-1" title="1"><span class="kw">par</span>(<span class="dt">mar=</span><span class="kw">c</span>(<span class="fl">0.1</span>,<span class="fl">0.1</span>,<span class="fl">0.1</span>,<span class="fl">0.1</span>),<span class="dt">oma=</span><span class="kw">c</span>(<span class="dv">0</span>,<span class="dv">0</span>,<span class="dv">0</span>,<span class="dv">0</span>))</a>
 <a class="sourceLine" id="cb4-2" title="2"><span class="kw">plot</span>(p12.shp,<span class="dt">pch=</span><span class="dv">21</span>,<span class="dt">bg=</span><span class="st">&quot;grey&quot;</span>,<span class="dt">cex=</span><span class="fl">0.5</span>)</a>
