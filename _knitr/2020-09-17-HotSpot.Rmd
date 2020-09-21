@@ -17,9 +17,9 @@ __Keywords:__ geostatistics, R, hot-spot, Getis-Ord
   
 Continuing our series on geospatial analysis we are diving deeper into spatial statistics Hot-spot analysis. In my prior posts I presented spatial interpolation techniques such as [kriging](https://swampthingpaul.github.io/blog/geospatial-data-analysis-in-rstats.-part-1/){target="_blank"} and spatial auto-correlation with [Moran's *I*](https://swampthingpaul.github.io/blog/geospatial-data-analysis-in-rstats.-part-2/){target="_blank"}. 
 
-Kriging is a value tool to detect spatial structure and patterns across a particular area. These spatial models rely on understanding the spatial correction and auto-correlation. A common component of spatial correlation/auto-correlation analyses is they are applied on a global scale (entire dataset). In some cases, it may be warranted to examine patterns at a more local (fine) scale. The Getis-Ord _G_ statistic provides information on local spatial structures and can identify areas of high (or low) clustering. This clustering is operationally defined as __hotspots__ and is done by comparing the sum in a particular variable within a local neighborhood network relative to the global sum of the area-of-interest extent [@getis_analysis_2010].
+Kriging is a value tool to detect spatial structure and patterns across a particular area. These spatial models rely on understanding the spatial correction and auto-correlation. A common component of spatial correlation/auto-correlation analyses is they are applied on a global scale (entire dataset). In some cases, it may be warranted to examine patterns at a more local (fine) scale. The Getis-Ord _G_ statistic provides information on local spatial structures and can identify areas of high (or low) clustering. This clustering is operationally defined as __hot-spots__ and is done by comparing the sum in a particular variable within a local neighborhood network relative to the global sum of the area-of-interest extent [@getis_analysis_2010].
 
-@getis_analysis_2010 introduced a family of measures of spatial associated called _G_ statistics. When used with spatial auto-correlation statistics such as Moran's _I_, the _G_ family of statistics can expand our understanding of processes that give rise to spatial association, in detecting local hotspots (in their original paper they used the term "pockets"). The Getis-Ord statistic can be used in the global ($G$) and local ($G_{i}^{*}$) scales. The global statistic ($G$) identifies high or low values across the entire study area (i.e. forest, wetland, city, etc.), meanwhile the local ($G_{i}^{*}$) statistic evaluates the data for each feature within the dataset and determining where features with high or low values ("pockets" or hot/cold) cluster spatially. 
+@getis_analysis_2010 introduced a family of measures of spatial associated called _G_ statistics. When used with spatial auto-correlation statistics such as Moran's _I_, the _G_ family of statistics can expand our understanding of processes that give rise to spatial association, in detecting local hot-spots (in their original paper they used the term "pockets"). The Getis-Ord statistic can be used in the global ($G$) and local ($G_{i}^{*}$) scales. The global statistic ($G$) identifies high or low values across the entire study area (i.e. forest, wetland, city, etc.), meanwhile the local ($G_{i}^{*}$) statistic evaluates the data for each feature within the dataset and determining where features with high or low values ("pockets" or hot/cold) cluster spatially. 
 
 At this point I would probably throw some equations around and give you the mathematical nitty gritty. Given I am not a maths wiz and @getis_analysis_2010 provides all the detail (lots of nitty and a little gritty) in such an eloquent fashion I'll leave it up to you if you want to peruse the manuscript. The Getis-Ord statistic has been applied across several different fields including crime analysis, epidemiology and a couple of forays into biogeochemistry and ecology. 
 
@@ -304,15 +304,15 @@ Lets determine the `two.side` $\rho$-value.
 p12.shp.wca2$pval<- 2*pnorm(-abs(p12.shp.wca2$localg))
 ```
 
-Based on the $z_{G_{i}^{*}}$-scores and $\rho$-value we operationally define a hotspot as  $z_{G_{i}^{*}}$-scores > 0 and $\rho$-value < $\alpha$ (usually 0.05). Let see if we have hotspots. 
+Based on the $z_{G_{i}^{*}}$-scores and $\rho$-value we operationally define a hot-spot as  $z_{G_{i}^{*}}$-scores > 0 and $\rho$-value < $\alpha$ (usually 0.05). Let see if we have hot-spots. 
 
 ```{r}
 subset(p12.shp.wca2@data,localg>0&pval<0.05)$STA_ID
 ```
 
-We have one site identified as a hotspot. Lets maps it out too.
+We have one site identified as a hot-spot. Lets maps it out too.
 
-```{r,echo=F,message=F,warning=F,fig.height=4,fig.width=5,fig.align="center",fig.cap="Soil total phosphorus hotspots identified using the Getis-Ord $G_{i}^{*}$ spatial statistic."}
+```{r,echo=F,message=F,warning=F,fig.height=4,fig.width=5,fig.align="center",fig.cap="Soil total phosphorus hot-spots identified using the Getis-Ord $G_{i}^{*}$ spatial statistic."}
 # library(classInt)
 # int=classIntervals(p12.shp.wca2$localg,breaks,)
 # int$brks
@@ -343,9 +343,9 @@ legend(0.5,0.4,legend=c("< 0.05"," > 0.05"),pch=c(21,22),lty=c(NA),lwd=c(0.1),
        title="\u03C1-value",title.adj = 0)
 ```
 
-For context, this soil TP hotspot occurs near discharge locations into Water Conservation Area 2A. Historically run-off from the upstream agricultural area would be diverted to the area to protection both the agricultural area and the downstream urban areas. Currently restoration activities has eliminated these direct discharge and water quality has improved. However, we still see the legacy affect from past water management. If your interested in how the system is responding check out the [South Florida Environmental Report](https://www.sfwmd.gov/science-data/scientific-publications-sfer){target="_blank"} here is last years [Everglades Water Quality](https://apps.sfwmd.gov/sfwmd/SFER/2020_sfer_final/v1/chapters/v1_ch3a.pdf){target="_blank"} chapter. 
+For context, this soil TP hot-spot occurs near discharge locations into Water Conservation Area 2A. Historically run-off from the upstream agricultural area would be diverted to the area to protection both the agricultural area and the downstream urban areas. Currently restoration activities has eliminated these direct discharge and water quality has improved. However, we still see the legacy affect from past water management. If your interested in how the system is responding check out the [South Florida Environmental Report](https://www.sfwmd.gov/science-data/scientific-publications-sfer){target="_blank"} here is last years [Everglades Water Quality](https://apps.sfwmd.gov/sfwmd/SFER/2020_sfer_final/v1/chapters/v1_ch3a.pdf){target="_blank"} chapter. 
 
-If you would like more background on hotspot analysis, ESRI produces a pretty good resource on [Getis-Ord $G_{i}^{*}$](https://pro.arcgis.com/en/pro-app/tool-reference/spatial-statistics/h-how-hot-spot-analysis-getis-ord-gi-spatial-stati.htm){target="_blank"}. 
+If you would like more background on hot-spot analysis, ESRI produces a pretty good resource on [Getis-Ord $G_{i}^{*}$](https://pro.arcgis.com/en/pro-app/tool-reference/spatial-statistics/h-how-hot-spot-analysis-getis-ord-gi-spatial-stati.htm){target="_blank"}. 
 
 This analysis can also be spatially aggregated (from ESRI) in the R by creating a grid, aggregating the data, estimate the nearest neighbor and evaluating on a local or global scale (maybe we will get to that another time). 
 
