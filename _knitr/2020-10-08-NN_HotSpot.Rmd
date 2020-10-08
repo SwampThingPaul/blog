@@ -1,6 +1,6 @@
 ---
 title: "Nearest Neighbor and Hot Spot Analysis - Geospatial data analysis in #rstats. Part 3b"
-date: "October 3,2020"
+date: "October 8,2020"
 output: 
   prettydoc::html_pretty:
   theme: default
