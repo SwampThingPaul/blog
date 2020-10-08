@@ -234,7 +234,7 @@ Let's determine the spatial weight (nearest neighbor distances). Since we are lo
 ptdist=pointDistance(p12.shp.wca2)
 
 min.dist<-min(ptdist); # Minimum
-mean.dist<-mean(ptdist); # Max
+mean.dist<-mean(ptdist); # Mean
 
 nb<-dnearneigh(coordinates(p12.shp.wca2),min.dist,mean.dist)
 

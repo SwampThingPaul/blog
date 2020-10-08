@@ -1,0 +1,454 @@
+---
+title: "Nearest Neighbor and Hot Spot Analysis - Geospatial data analysis in #rstats. Part 3b"
+date: "October 3,2020"
+output: 
+  prettydoc::html_pretty:
+  theme: default
+highlight: github
+editor_options: 
+  chunk_output_type: console
+bibliography: "Nearest.bib"
+link-citations: yes
+---
+  
+__Keywords:__ geostatistics, R, nearest neighbor, Getis-Ord
+
+```{r setup, include=FALSE}
+# knitr::opts_chunk$set(echo = TRUE)
+```
+
+As promised here is another follow-up to our Geospatial data analysis blog series. So far we have covered interpolaiton, spatial auto-correlation and the basics of Hot-Spot (Getis-Ord) analysis. 
+
+- Part I: [Interpolation](https://swampthingecology.org/blog/geospatial-data-analysis-in-rstats.-part-1/){target="_blank"}
+
+- Part 2: [Spatial Autocorrelation](https://swampthingecology.org/blog/geospatial-data-analysis-in-rstats.-part-2/){target="_blank"} 
+
+- Part 3: [Hot Spot Analysis](https://swampthingecology.org/blog/hot-spot-analysis-geospatial-data-analysis-in-rstats.-part-3/){target="_blank"} 
+
+In this post we will discuss nearest neighbor estimates and how it can affect hot spot detection. In essence this is __"Getis-Ord Strikes Back"__ (sorry my Star Wars nerd is showing). 
+
+***
+
+Let's take a step back before jumping back into nearest neighbor (see my post on [Moran's *I*](https://swampthingecology.org/blog/geospatial-data-analysis-in-rstats.-part-2/){target="_blank"}). Most spatial statistics compare a test statistic estimated from the data then compared to an expected value given the null hypothesis of complete spatial randomness (CSR; @fortin_spatial_2005; _not to be confused with `CRS(...)` coordinate reference system_). This is a point process model that can be estimated from a particular distribution, in most cases a Poisson [@diggle_spatio-temporal_2006]. A theme in the analysis of spatial point patterns such as Moran's *I*, Getis-Ord *G* or Ripley's *K* provides a distinction between spatial patterns where CSR is a dividing hypothesis [@cox_role_1977], which leads to classification of random (complete spatial randomness), under-dispersed (clumped or aggregated), or over-dispersed (spaced or regular) patterns.
+
+<!-- resource: 
+https://joparga3.github.io/spatial_point_pattern/ 
+https://www.seas.upenn.edu/~ese502/NOTEBOOK/Part_I/2_Models_of_Spatial_Randomness.pdf
+https://training.fws.gov/courses/references/tutorials/geospatial/CSP7304/documents/PointPatterTutorial.pdf
+
+### Models of Spatial Randomness
+
+The _Principle of Insufficient Reason_ or Laplace Principle asserts that if there is no information to indicate that either of two events is more likely than others, then they should be treated as equally likely. Translating this into a graphical explanation, if we have an area divided in equal areas, there is no reason to believe that this point is more likely to appear in either left half or the (identical) right half.  If we look at the image below, for the first case, any given point should have the same probability (1/2) of appearing in either half of the area. If we divide the areas again by half, then points should have the same probability (1/4) of appearing in any of the 4 squares and so on. 
+
+```{r Laplace, fig.height=2, fig.width=6.5,fig.align="center", echo=FALSE,message=F,warning=F}
+
+par(family="serif",mar=c(0.5,0.5,0.5,0.5),oma=c(0.1,0.1,0.1,0.1));
+layout(matrix(c(1:5),1,5,byrow=T),widths=c(1,0.5,1,0.5,1))
+
+plot(0:1,0:1,axes=F,ann=F,type="n")
+polygon(c(0,0,0.5,0.5),c(0,1,1,0))
+text(0.25,0.5,"1/2")
+polygon(c(0.5,0.5,1,1),c(0,1,1,0))
+text(0.75,0.5,"1/2")
+
+plot(0:1,0:1,axes=F,ann=F,type="n")
+arrows(0.2,0.5,0.8,0.5,lwd=3,length=0.1)
+
+plot(0:1,0:1,axes=F,ann=F,type="n")
+polygon(c(0,0,0.5,0.5),c(0,0.5,0.5,0))
+text(0.25,0.25,"1/4")
+polygon(c(0,0,0.5,0.5),c(0.5,1,1,0.5))
+text(0.25,0.75,"1/4")
+polygon(c(0.5,0.5,1,1),c(0,0.5,0.5,0))
+text(0.75,0.25,"1/4")
+polygon(c(0.5,0.5,1,1),c(0,1,1,0))
+text(0.75,0.75,"1/4")
+
+plot(0:1,0:1,axes=F,ann=F,type="n")
+arrows(0.2,0.5,0.8,0.5,lwd=3,length=0.1)
+
+plot(0:1,0:1,axes=F,ann=F,type="n")
+text(0.5,0.5,"...",cex=5)
+
+```
+
+Therefore the assumptions of spatially random models are: 
+
+1. Without any given information on the likelihood of events occurring being different across the dataset (study area), the probability should be the same for all events across the study area (Laplace Principal).
+
+2. Locations of points have no influence on one another (i.e. spatial autocorrelation)
+
+-->
+
+Below we are going to import some data, use different techniques to estimate nearest neighbor and see how that affects Hot spot detection. 
+
+### Let's get started
+
+Before we get too deep into things here are the necessary packages we will be using. 
+```{r libraries,echo=T,message=F,warning=F}
+## Libraries
+# read xlsx files
+library(readxl)
+
+# Geospatial 
+library(rgdal)
+library(rgeos)
+library(raster)
+library(spdep)
+
+```
+
+Same data and links from last post. 
+
+- Download the data (as a zip file) [here](https://www.epa.gov/sites/production/files/2014-03/sf1data.zip){target="_blank"}! 
+
+- Download the Water Conservation Areas shapefile [here]("https://www.swampthingecology.org/blog/data/hotspot/WCAs.zip"){target="_blank}! 
+
+```{r, include=F}
+library(AnalystHelper)
+# library(openxlsx)
+#Paths
+wd="C:/Julian_LaCie/Work/REMAP"
+
+paths=paste0(wd,c("/Plots/","/Export/","/Data/","/GIS"))
+#Folder.Maker(paths);#One and done. Creates folders in working directory.
+plot.path=paths[1]
+export.path=paths[2]
+data.path=paths[3]
+GIS.path=paths[4]
+
+gen.gis="C:/Julian_LaCie/_GISData/"
+# GIS ---------------------------------------------------------------------
+utm17=CRS("+proj=utm +zone=17 +datum=WGS84 +units=m")
+wgs84=CRS("+proj=longlat +datum=WGS84 +no_defs +ellps=WGS84 +towgs84=0,0,0")
+
+#ogrListLayers(paste0(gen.gis,"SFER_GIS_Geodatabase.gdb"))
+canal=spTransform(readOGR(paste0(gen.gis,"SFER_GIS_Geodatabase.gdb"),"SFWMD_Canals"),utm17)
+wcas=spTransform(readOGR(paste0(gen.gis,"SFER_GIS_Geodatabase.gdb"),"WCAs"),utm17)
+# writeOGR(wcas,"C:/Julian_LaCie/_Github/blog/data/hotspot","WCAs",driver="ESRI Shapefile")
+enp=spTransform(readOGR(paste0(gen.gis,"SFER_GIS_Geodatabase.gdb"),"ENP"),utm17)
+
+p12=readxl::read_xls(paste0(data.path,"P12/P12join7FINAL.xls"),sheet=2)
+colnames(p12)=sapply(strsplit(names(p12),"\\$"),"[",1);#removes "$" in column name
+p12=data.frame(p12)
+p12$DATE=date.fun(openxlsx::convertToDate(p12$DATE))
+p12=subset(p12,is.na(DECLONG)==F|is.na(DECLAT)==F)
+p12[p12==-9999]<-NA
+p12[p12==-3047.6952]<-NA
+
+vars=c("STA_ID","CYCLE","SUBAREA","DECLONG","DECLAT","DATE","TPSDF")
+p12.shp=SpatialPointsDataFrame(coords=p12[,c("DECLONG","DECLAT")],
+                               data=p12[,vars],proj4string =wgs84)
+p12.shp=spTransform(p12.shp,utm17)
+
+p12.shp2=subset(p12.shp,CYCLE%in%c(0,2))
+p12.shp.wca=p12.shp2[wcas,]
+
+# Remove NA sample
+p12.shp.wca<-subset(p12.shp.wca,is.na(TPSDF)==F)
+
+```
+
+```{r,eval=F}
+# Define spatial datum
+utm17<-CRS("+proj=utm +zone=17 +datum=WGS84 +units=m")
+wgs84<-CRS("+proj=longlat +datum=WGS84 +no_defs +ellps=WGS84 +towgs84=0,0,0")
+
+# Read shapefile
+wcas<-readOGR(GISdata,"WCAs")
+wcas<-spTransform(wcas,utm17)
+
+# Read the spreadsheet
+p12<-readxl::read_xls("data/P12join7FINAL.xls",sheet=2)
+
+# Clean up the headers
+colnames(p12)<-sapply(strsplit(names(p12),"\\$"),"[",1)
+p12<-data.frame(p12)
+p12[p12==-9999]<-NA
+p12[p12==-3047.6952]<-NA
+
+# Convert the data.frame() to SpatialPointsDataFrame
+vars<-c("STA_ID","CYCLE","SUBAREA","DECLONG","DECLAT","DATE","TPSDF")
+p12.shp<-SpatialPointsDataFrame(coords=p12[,c("DECLONG","DECLAT")],
+                               data=p12[,vars],proj4string =wgs84)
+# transform to UTM (something I like to do...but not necessary)
+p12.shp<-spTransform(p12.shp,utm17)
+
+# Subset the data for wet season data only and only WCA sites
+p12.shp2<-subset(p12.shp,CYCLE%in%c(0,2))
+p12.shp.wca<-p12.shp2[wcas,]
+
+# Double check for NAs in the dataset
+subset(p12.shp.wca@data,is.na(TPSDF)==T)
+
+# Remove NA sample
+p12.shp.wca<-subset(p12.shp.wca,is.na(TPSDF)==F)
+```
+
+Here is a quick map the of the subsetted data
+```{r,echo=T,message=F,warning=F,fig.height=4,fig.width=4.5,fig.align="center", fig.cap="Monitoring location from R-EMAP Phase I, wet season sampling (cycles 0 and 2) within the Water Conservation Areas."}
+par(mar=c(0.1,0.1,0.1,0.1),oma=c(0,0,0,0))
+plot(wcas)
+plot(p12.shp.wca,pch=21,bg=adjustcolor("dodgerblue1",0.5),cex=1,add=T)
+mapmisc::scaleBar(utm17,"bottomright",bty="n",cex=1,seg.len=4)
+```
+
+### Nearest Neighbor
+
+As discussed in our prior blog post, average nearest neighbor (ANN) analysis measures the average distance from each point in the study area to its nearest point. In some cases, this methods can be sensitive to which distance bands are identified and can therefore be carried forward into other analyses that rely on nearest neighbor spatial weighting. However, ANN statistic is one of many distance based point pattern analysis statistics that can be used to spatially weight the dataset necessary for spatial statistical evaluation. Others include K, L and pair correlation function (g; not to confused with Getis-Ord _G_) [@gimond_intro_2020].
+
+<!-- https://pro.arcgis.com/en/pro-app/tool-reference/spatial-statistics/h-how-average-nearest-neighbor-distance-spatial-st.htm#:~:text=The%20average%20nearest%20neighbor%20ratio,covering%20the%20same%20total%20area). -->
+
+One way to spatially weight the data is by using the `dnearneigh()` function which identifies neighbors within the lower and upper bounds (provided in the function) by Euclidean distance. Here is where selection of "distance bands" matter. This function was used in the initial [Hot-Spot](https://swampthingecology.org/blog/hot-spot-analysis-geospatial-data-analysis-in-rstats.-part-3/){target="_blank"} blog post. Lets see how changing the upper bounds in the `dnearneigh()` can affect the outcome.
+
+
+```{r}
+# Find distance range
+ptdist=pointDistance(p12.shp.wca)
+
+min.dist<-min(ptdist); # Minimum
+
+q10.dist<-as.numeric(quantile(ptdist,probs=0.10)); # Q10
+q25.dist<-as.numeric(quantile(ptdist,probs=0.25)); # Q25
+q75.dist<-as.numeric(quantile(ptdist,probs=0.75)); # Q75
+
+# Using 25th percentile distance for upper bound
+nb.q10<-dnearneigh(coordinates(p12.shp.wca),min.dist,q10.dist)
+
+# Using 25th percentile distance for upper bound
+nb.q25<-dnearneigh(coordinates(p12.shp.wca),min.dist,q25.dist)
+
+# Using 75th percentile distance for upper bound
+nb.q75<-dnearneigh(coordinates(p12.shp.wca),min.dist,q75.dist)
+
+
+```
+
+```{r,fig.height=4,fig.width=6.5,echo=F,message=F,warning=F,fig.align="center",fig.cap="Neighborhood network with different upper bound values"}
+par(family="serif",oma=c(0.1,0.5,2,0.5),mar=c(0.1,0.1,0.1,0.1))
+
+bbox.lims<-bbox(wcas) # bbox(gBuffer(wcas,width=1000))
+layout(matrix(1:3,1,3))
+
+plot(wcas,ylim=bbox.lims[c(2,4)],xlim=bbox.lims[c(1,3)],lwd=0.05,col="grey90")
+plot(nb.q10,coordinates(p12.shp.wca),col="red",lwd=0.8,add=T)
+plot(p12.shp.wca,pch=21,bg="white",add=T,cex=1.5)
+mtext(side=3,line=-2,paste0("Distance based neighbors\n(0 - ",round(q10.dist,1)," km)\nUpper Bound 10th Quantile"))
+
+plot(wcas,ylim=bbox.lims[c(2,4)],xlim=bbox.lims[c(1,3)],lwd=0.05,col="grey90")
+plot(nb.q25,coordinates(p12.shp.wca),col="red",lwd=0.8,add=T)
+plot(p12.shp.wca,pch=21,bg="white",add=T,cex=1.5)
+mtext(side=3,line=-2,paste0("Distance based neighbors\n(0 - ",round(q25.dist,1)," km)\nUpper Bound 25th Quantile"))
+
+plot(wcas,ylim=bbox.lims[c(2,4)],xlim=bbox.lims[c(1,3)],lwd=0.05,col="grey90")
+plot(nb.q75,coordinates(p12.shp.wca),col="red",lwd=0.8,add=T)
+plot(p12.shp.wca,pch=21,bg="white",add=T,cex=1.5)
+mtext(side=3,line=-2,paste0("Distance based neighbors\n(0 - ",round(q75.dist,1)," km)\nUpper Bound 75th Quantile"))
+
+```
+
+As you can see the number of links between locations increases as the upper bound is expanded thereby increasing the average number of links within the network. How would this potentially influence the detection of clusters within the data set. Remember the last [Hot-Spot](https://swampthingecology.org/blog/hot-spot-analysis-geospatial-data-analysis-in-rstats.-part-3/){target="_blank"} blog post? Well lets run through the code, below is using the 10th quantile as the upper bound as an example.
+
+```{r}
+# Convert nearest neighbor to a list
+nb_lw<-nb2listw(nb.q10)
+
+# local G
+local_g<-localG(p12.shp.wca$TPSDF,nb_lw)
+
+# convert to matrix
+local_g.ma=as.matrix(local_g)
+
+# column-bind the local_g data
+p12.shp.wca<-cbind(p12.shp.wca,local_g.ma)
+
+# change the names of the new column
+names(p12.shp.wca)[ncol(p12.shp.wca)]="localg.Q10"
+
+# determine p-value of z-score
+p12.shp.wca$pval.q10<- 2*pnorm(-abs(p12.shp.wca$localg.Q10))
+
+# See if any site is a "Hot-Spot"
+subset(p12.shp.wca@data,localg.Q10>0&pval.q10<0.05)$STA_ID
+
+```
+
+Looks like a couple of sites are considered Hot-Spots. Now do that same thing for `nb.q25` and `nb.q75` and this is what you get. 
+
+```{r,include=F,eval=T,warning=F}
+nb_lw<-nb2listw(nb.q25)
+local_g<-localG(p12.shp.wca$TPSDF,nb_lw)
+local_g.ma=as.matrix(local_g)
+p12.shp.wca<-cbind(p12.shp.wca,local_g.ma)
+names(p12.shp.wca)[ncol(p12.shp.wca)]="localg.Q25"
+p12.shp.wca$pval.q25<- 2*pnorm(-abs(p12.shp.wca$localg.Q25))
+
+nb_lw<-nb2listw(nb.q75)
+local_g<-localG(p12.shp.wca$TPSDF,nb_lw)
+local_g.ma=as.matrix(local_g)
+p12.shp.wca<-cbind(p12.shp.wca,local_g.ma)
+names(p12.shp.wca)[ncol(p12.shp.wca)]="localg.Q75"
+p12.shp.wca$pval.q75<- 2*pnorm(-abs(p12.shp.wca$localg.Q75))
+
+```
+
+```{r,echo=F,message=F,warning=F,fig.height=4.5,fig.width=7.5,fig.align="center",fig.cap="Soil total phosphorus hot-spots identified using the Getis-Ord $G_{i}^{*}$ spatial statistic based on different nearest neighbor bands."}
+# library(classInt)
+# int=classIntervals(p12.shp.wca2$localg,breaks,)
+# int$brks
+int=c(-5,-3,-2,-1,0,1,2,3,5)
+pal=hcl.colors(length(int)-1, "Heat", rev = F,alpha=0.7)
+
+par(family="serif",oma=c(0.5,0.5,0.5,0.5),mar=c(0.1,0.1,0.1,0.1))
+layout(matrix(c(1:4),1,4,byrow=T),widths = c(1,1,1,0.6))
+bbox.lims<-bbox(wcas)
+
+cols.val=findInterval(p12.shp.wca$localg.Q10,int)
+pch.vals=with(p12.shp.wca@data,ifelse(pval.q10<0.05,21,22))
+cex.vals=with(p12.shp.wca@data,ifelse(pval.q10<0.05,2.5,1.5))
+plot(wcas,ylim=bbox.lims[c(2,4)],xlim=bbox.lims[c(1,3)],lwd=0.05)
+plot(p12.shp.wca,pch=pch.vals,bg=pal[cols.val],cex=cex.vals,add=T)
+mapmisc::scaleBar(utm17,"bottomleft",bty="n",cex=1,seg.len=4)
+mtext(side=3,line=-2,"10th Quantile Upper Bound\nNearest Neighbor")
+
+cols.val=findInterval(p12.shp.wca$localg.Q25,int)
+pch.vals=with(p12.shp.wca@data,ifelse(pval.q25<0.05,21,22))
+cex.vals=with(p12.shp.wca@data,ifelse(pval.q25<0.05,2.5,1.5))
+plot(wcas,ylim=bbox.lims[c(2,4)],xlim=bbox.lims[c(1,3)],lwd=0.05)
+plot(p12.shp.wca,pch=pch.vals,bg=pal[cols.val],cex=cex.vals,add=T)
+mtext(side=3,line=-2,"25th Quantile Upper Bound\nNearest Neighbor")
+
+cols.val=findInterval(p12.shp.wca$localg.Q75,int)
+pch.vals=with(p12.shp.wca@data,ifelse(pval.q75<0.05,21,22))
+cex.vals=with(p12.shp.wca@data,ifelse(pval.q75<0.05,2.5,1.5))
+plot(wcas,ylim=bbox.lims[c(2,4)],xlim=bbox.lims[c(1,3)],lwd=0.05)
+plot(p12.shp.wca,pch=pch.vals,bg=pal[cols.val],cex=cex.vals,add=T)
+mtext(side=3,line=-2,"75th Quantile Upper Bound\nNearest Neighbor")
+
+plot(0:1,0:1,ann=F,axes=F,type="n")
+n=length(int)-1
+labs=c("< -3.0","-3.0 - -2.0","-2.0 - -1.0","-1.0 - 0.0","0.0 - 1.0", "1.0 - 2.0","2.0 - 3.0","> 3.0")#NA
+#for(i in 1:n){labs[i]=paste(format(round(int.bks[i],2),nsmall=2),format(round(int.bks[i+1],2),nsmall=2),sep=" - ")}
+bx.val= seq(0.4,0.85,(0.85-0.4)/n)
+rect(0.15,bx.val[1:n],0.25,bx.val[2:(n+1)],col=rev(pal),lty=0)
+text(x=0.25, y = bx.val[2:(n+1)]-c(mean(diff(bx.val[2:(n+1)]))/2), labels = rev(labs),cex=0.8,adj=0,pos=4)
+text(x=0.15,y=0.90,expression(paste("Local Getis-Ord G"["i"]^"*")),adj=0,cex=1)
+
+legend(0.5,0.4,legend=c("< 0.05"," > 0.05"),pch=c(21,22),lty=c(NA),lwd=c(0.1),
+       pt.bg="grey",pt.cex=c(2.5,1.5),ncol=1,cex=1,bty="n",y.intersp=1,x.intersp=0.75,xpd=NA,xjust=0.5,yjust=1,
+       title="\u03C1-value",title.adj = 0)
+```
+
+Hot-Spots are identified with $G_{i}^{*}$ > 0 and associated with significant $\rho$ values (in this cast our $\alpha$ is 0.05). Alternatively "Cold-Spots", or areas associated with clustering of relatively low values are identified with $G_{i}^{*}$ < 0 (and significant $\rho$ values). Across the three different distance bands, you can see a potential shift in Hot-Spots and the occurrence (and shift) of Cold-Spots across the study area.
+
+```{r,echo=F,message=F,warning=F,fig.height=3.5,fig.width=5,fig.align="center",fig.cap="Number of sites identified as Hot-Spots across the study by Nearest Neigbhor upper bound band."}
+
+vals=c(N.obs(subset(p12.shp.wca@data,localg.Q10>0&pval.q10<0.05)$STA_ID),N.obs(subset(p12.shp.wca@data,localg.Q25>0&pval.q25<0.05)$STA_ID),N.obs(subset(p12.shp.wca@data,localg.Q75>0&pval.q75<0.05)$STA_ID))/nrow(p12.shp.wca)*100
+
+par(family="serif",mar=c(2,2,1,0.5),oma=c(2,2,0.25,0.5));
+ylim.val=c(0,30);by.y=10;ymaj=seq(ylim.val[1],ylim.val[2],by.y);ymin=seq(ylim.val[1],ylim.val[2],by.y/2)
+x=barplot(vals,ylim=ylim.val,axes=F,space=0.1,col=pal[length(int)-1])
+axis_fun(1,x,x,c("10th\nQuantile","25th\nQuantile","75th\nQuantile"),line=0.5)
+axis_fun(2,ymaj,ymin,ymaj);box(lwd=1)
+mtext(side=2,line=2,"Percent of Sites")
+mtext(side=1,line=2.75,"Upper Bound Nearest Neighbor Band")
+
+```
+
+An alternative to selecting distance bands is to use a different approach such as K-function or K nearest neighbors. K-function summarizes the distance between points for _all_ distances [@gimond_intro_2020]. This method can also be sensitive to distance bands but less so than above. In k-function nearest neighbor using `knearneigh()`, the function will eventually give a warning letting you know but will still compute the values anyways.
+
+```
+Warning messages:
+1: In knearneigh(p12.shp.wca, k = 45) :
+  k greater than one-third of the number of data points
+```
+
+```{r, echo=F,message=F,warning=F,fig.height=3.5,fig.width=6,fig.align="center",fig.cap="The affect of the number of nearest neighbors on average nearest neighbor distance."}
+test=NA
+for(i in 1:45){
+  test[i]=mean(knearneigh(p12.shp.wca,k=i)$nn)
+}
+
+par(family="serif",mar=c(1.5,2,1,0.5),oma=c(1.5,2,0.25,0.5));
+xlim.val=c(0,45);by.x=5;xmaj=seq(xlim.val[1],xlim.val[2],by.x);xmin=seq(xlim.val[1],xlim.val[2],by.x/2)
+ylim.val=c(64,67);by.y=1;ymaj=seq(ylim.val[1],ylim.val[2],by.y);ymin=seq(ylim.val[1],ylim.val[2],by.y/2)
+plot(test,ylim=ylim.val,xlim=xlim.val,axes=F,ann=F,type="n")
+abline(h=ymaj,v=xmaj,lty=3,col="grey")
+pt_line(1:45,test,2,"grey",1.25,21,"forestgreen",cex=1.5)
+abline(v=nrow(p12.shp.wca)*0.3,col="red",lwd=2)
+text(nrow(p12.shp.wca)*0.3,66.8,pos=4,"one-third\nthreshold",cex=0.8,font=3)
+axis_fun(1,xmaj,xmin,xmaj,line=-0.5)
+axis_fun(2,ymaj,ymin,ymaj);box(lwd=1)
+mtext(side=1,line=2,"Number of nearest neighbors included")
+mtext(side=2,line=2,"Average Nearest Neighbor Distance (km)")
+
+```
+
+Based on the plot above, a `k=6` seems to be conservative enough. As suggested in the last blog post this could be done by...
+
+```{r}
+
+k1<-knn2nb(knearneigh(p12.shp.wca,k=6))
+```
+
+<!-- Some resources
+https://daviddalpiaz.github.io/r4sl/knn-class.html
+-->
+
+```{r}
+# Convert nearest neighbor to a list
+nb_lw<-nb2listw(k1)
+
+# local G
+local_g<-localG(p12.shp.wca$TPSDF,nb_lw)
+
+# convert to matrix
+local_g.ma=as.matrix(local_g)
+
+# column-bind the local_g data
+p12.shp.wca<-cbind(p12.shp.wca,local_g.ma)
+
+# change the names of the new column
+names(p12.shp.wca)[ncol(p12.shp.wca)]="localg.k"
+
+# determine p-value of z-score
+p12.shp.wca$pval.k<- 2*pnorm(-abs(p12.shp.wca$localg.k))
+
+```
+
+```{r,echo=F,message=F,warning=F,fig.height=4,fig.width=5,fig.align="center",fig.cap="Soil total phosphorus hot-spots identified using the Getis-Ord $G_{i}^{*}$ spatial statistic with k-function nearest neighbor spatial weighting."}
+
+int=c(-2,-1,0,1,2,3,4)
+pal=hcl.colors(length(int)-1, "Heat", rev = F,alpha=0.7)
+cols.val=findInterval(p12.shp.wca$localg.k,int)
+pch.vals=with(p12.shp.wca@data,ifelse(pval.k<0.05,21,22))
+cex.vals=with(p12.shp.wca@data,ifelse(pval.k<0.05,2.5,1.5))
+
+par(family="serif",oma=c(0.5,0.5,0.5,0.5),mar=c(0.1,0.1,0.1,0.1))
+layout(matrix(c(1:2),1,2,byrow=T),widths = c(1,0.5))
+bbox.lims=bbox(wcas)
+plot(wcas,ylim=bbox.lims[c(2,4)],xlim=bbox.lims[c(1,3)],lwd=0.05)
+plot(p12.shp.wca,pch=pch.vals,bg=pal[cols.val],cex=cex.vals,add=T)
+mapmisc::scaleBar(utm17,"bottomright",bty="n",cex=1,seg.len=4)
+
+plot(0:1,0:1,ann=F,axes=F,type="n")
+n=length(int)-1
+labs=c("< -1.0","-1.0 - 0.0","0.0 - 1.0", "1.0 - 2.0","2.0 - 3.0","> 3.0")#NA
+#for(i in 1:n){labs[i]=paste(format(round(int.bks[i],2),nsmall=2),format(round(int.bks[i+1],2),nsmall=2),sep=" - ")}
+bx.val= seq(0.4,0.85,(0.85-0.4)/n)
+rect(0.15,bx.val[1:n],0.25,bx.val[2:(n+1)],col=rev(pal),lty=0)
+text(x=0.25, y = bx.val[2:(n+1)]-c(mean(diff(bx.val[2:(n+1)]))/2), labels = rev(labs),cex=0.75,adj=0,pos=4)
+text(x=0.15,y=0.90,expression(paste("Local Getis-Ord G"["i"]^"*")),adj=0,cex=1)
+
+legend(0.5,0.4,legend=c("< 0.05"," > 0.05"),pch=c(21,22),lty=c(NA),lwd=c(0.1),
+       pt.bg="grey",pt.cex=c(2.5,1.5),ncol=1,cex=1,bty="n",y.intersp=1,x.intersp=0.75,xpd=NA,xjust=0.5,yjust=1,
+       title="\u03C1-value",title.adj = 0)
+```
+
+using K-function nearest neighbor we have the occurrence of Hot-Spots in the general area of the other evaluations presented above. As suggested in the original Hot-Spot blog, the selection of spatial weights is important and the test is sensitive to the weights assigned. 
+
+The next post will cover how spatial aggregation can play a role in Hot-Spot detection. Until then I'll leave you with this quote that helps put spatial statistical analysis into perspective. 
+
+>“The first law of geography: Everything is related to everything else, but near things are more related than distant things.” [@tobler_computer_1970]
+
+***

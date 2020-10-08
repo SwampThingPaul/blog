@@ -98,7 +98,7 @@ Soil total phosphorus concentration within Water Conservation Area 2A during Pha
 <a class="sourceLine" id="cb5-2" title="2">ptdist=<span class="kw">pointDistance</span>(p12.shp.wca2)</a>
 <a class="sourceLine" id="cb5-3" title="3"></a>
 <a class="sourceLine" id="cb5-4" title="4">min.dist&lt;-<span class="kw">min</span>(ptdist); <span class="co"># Minimum</span></a>
-<a class="sourceLine" id="cb5-5" title="5">mean.dist&lt;-<span class="kw">mean</span>(ptdist); <span class="co"># Max</span></a>
+<a class="sourceLine" id="cb5-5" title="5">mean.dist&lt;-<span class="kw">mean</span>(ptdist); <span class="co"># Mean</span></a>
 <a class="sourceLine" id="cb5-6" title="6"></a>
 <a class="sourceLine" id="cb5-7" title="7">nb&lt;-<span class="kw">dnearneigh</span>(<span class="kw">coordinates</span>(p12.shp.wca2),min.dist,mean.dist)</a></code></pre></div>
 <div class="figure" style="text-align: center">
