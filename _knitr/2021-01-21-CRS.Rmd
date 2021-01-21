@@ -151,11 +151,9 @@ dat2
 dat2.shp<-SpatialPointsDataFrame(dat2[,c("UTMX","UTMY")],
                                 data=dat2,
                                 proj4string=utm17)
-dat2.shp
-
 ```
 
-This is as much as I have been able to work through these changes. It's not huge large scale changes to existing workflows but enough to cause some heartburn. 
+This is as much as I have been able to work through these changes. It's not huge scale changes to existing work-flows but enough to cause some heartburn. 
 
 ```{r, out.width="50%",echo=FALSE,fig.align="center"}
 knitr::include_graphics("../images/20210121_CRS/sherlock_drugged.gif")

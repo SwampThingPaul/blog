@@ -99,13 +99,8 @@ In OGRSpatialRef(dsn, layer, morphFromESRI = morphFromESRI, dumpSRS = dumpSRS,  
 ## 3    3 585419 2819900</code></pre>
 <div class="sourceCode" id="cb15"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>dat2.shp<span class="ot">&lt;-</span><span class="fu">SpatialPointsDataFrame</span>(dat2[,<span class="fu">c</span>(<span class="st">&quot;UTMX&quot;</span>,<span class="st">&quot;UTMY&quot;</span>)],</span>
 <span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>                                <span class="at">data=</span>dat2,</span>
-<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>                                <span class="at">proj4string=</span>utm17)</span>
-<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>dat2.shp</span></code></pre></div>
-<pre><code>##         coordinates SITE   UTMX    UTMY
-## 1 (590382, 2830587)    1 590382 2830587
-## 2 (583910, 2821685)    2 583910 2821685
-## 3 (585419, 2819900)    3 585419 2819900</code></pre>
-<p>This is as much as I have been able to work through these changes. It’s not huge large scale changes to existing workflows but enough to cause some heartburn.</p>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>                                <span class="at">proj4string=</span>utm17)</span></code></pre></div>
+<p>This is as much as I have been able to work through these changes. It’s not huge scale changes to existing work-flows but enough to cause some heartburn.</p>
 <p><img src="{{ site.url }}{{ site.baseurl }}\images\20210121_CRS\sherlock_drugged.gif" width="50%" style="display: block; margin: auto;" /></p>
 <p>Hope this was helpful (sorry for all the Sherlock gifs)…keep coding friends.</p>
 <p><img src="{{ site.url }}{{ site.baseurl }}\images\20210121_CRS\sherlock_smile.gif" width="40%" style="display: block; margin: auto;" /></p>
