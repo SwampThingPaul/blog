@@ -1,4 +1,4 @@
-#devtools::install_github("privefl/prettyjekyll")
+# devtools::install_github("privefl/prettyjekyll")
 setwd("C:/Julian_LaCie/_GitHub/blog")
 knit.clean=function(post.name){
   require(prettyjekyll)
@@ -55,3 +55,7 @@ knit.clean=function(post.name){
 #knit.clean("2020-01-24-Boxplot")
 
 #knit.clean("2020-09-17-HotSpot")
+
+# knit.clean("2020-10-08-NN_HotSpot")
+
+# knit.clean("2021-01-21-CRS")
