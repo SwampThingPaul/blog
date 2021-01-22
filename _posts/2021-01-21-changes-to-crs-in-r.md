@@ -18,7 +18,12 @@ layout: post
 <p>…so expect lots of blog posts and resources.</p>
 <hr />
 <p>The cliff notes version (short, short version) is that changes in how the representation of coordinate reference systems (CRS) have finally caught up with how spatial data is handled in R packages (or maybe its the otherway around). In a vignette titled title <a href="https://rgdal.r-forge.r-project.org/articles/CRS_projections_transformations.html" target="_blank"><em>“Why have CRS, projections and transformations”</em></a>, <a href="https://twitter.com/RogerBivand" target="_blank">Roger Bivand</a> explains the nitty gritty.</p>
-<p>Here are some more resources: * YouTube lecture by Roger Bivand (<a href="https://youtu.be/2H1Tn4oN32M" target="_blank">link</a>) * Associated material (<a href="https://rsbivand.github.io/ECS530_h20/ECS530_III.html" target="_blank">link</a>) * Bivand, R.S. Progress in the R ecosystem for representing and handling spatial data. J Geogr Syst (2020). <a href="https://doi.org/10.1007/s10109-020-00336-0" target="_blank">https://doi.org/10.1007/s10109-020-00336-0</a></p>
+<p>Here are some more resources:</p>
+<ul>
+<li>YouTube lecture by Roger Bivand (<a href="https://youtu.be/2H1Tn4oN32M" target="_blank">link</a>)</li>
+<li>Associated material (<a href="https://rsbivand.github.io/ECS530_h20/ECS530_III.html" target="_blank">link</a>)</li>
+<li>Bivand, R.S. Progress in the R ecosystem for representing and handling spatial data. J Geogr Syst (2020). <a href="https://doi.org/10.1007/s10109-020-00336-0" target="_blank">https://doi.org/10.1007/s10109-020-00336-0</a></li>
+</ul>
 <p>Roger also penned this post explaining the migration specific for the <code>rgdal</code>, <code>sp</code> and <code>raster</code> packages specific to read, write, project, and transform objects using PROJ strings (<a href="https://cran.r-project.org/web/packages/rgdal/vignettes/PROJ6_GDAL3.html#Migration_to_PROJ6GDAL3" target="_blank"><em>“Migration to PROJ6/GDAL3”</em></a>). It gets rather complex but a good resource.</p>
 <p>In another resource I came across in my sleuthing and troubleshooting by Edzer Pebesma and Roger Bivand discussing how <a href="https://gdal.org/" target="_blank">GDAL</a> and <a href="https://proj.org" target="_blank">PROJ</a> (formerly proj.4) relates to geospatial tools including several <code>R</code> packages in a post titled <a href="https://www.r-spatial.org/r/2020/03/17/wkt.html" target="_blank"><em>“R spatial follows GDAL and PROJ developement”</em></a>. As an example, they outline the dependency for the <code>sf</code> package, pictured here:</p>
 <p><img src="https://keen-swartz-3146c4.netlify.com/images/sf_deps.png" width="75%" style="display: block; margin: auto;" /></p>

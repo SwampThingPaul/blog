@@ -38,6 +38,7 @@ knitr::include_graphics("../images/20210121_CRS/sherlock_shcoked.gif")
 The cliff notes version (short, short version) is that changes in how the representation of coordinate reference systems (CRS) have finally caught up with how spatial data is handled in R packages (or maybe its the otherway around). In a vignette titled title [_"Why have CRS, projections and transformations"_](https://rgdal.r-forge.r-project.org/articles/CRS_projections_transformations.html){target="_blank"}, [Roger Bivand](https://twitter.com/RogerBivand){target="_blank"} explains the nitty gritty.
 
 Here are some more resources: 
+
 * YouTube lecture by Roger Bivand ([link](https://youtu.be/2H1Tn4oN32M){target="_blank"})
 * Associated material ([link](https://rsbivand.github.io/ECS530_h20/ECS530_III.html){target="_blank"})
 * Bivand, R.S. Progress in the R ecosystem for representing and handling spatial data. J Geogr Syst (2020). [https://doi.org/10.1007/s10109-020-00336-0](https://doi.org/10.1007/s10109-020-00336-0){target="_blank"}
