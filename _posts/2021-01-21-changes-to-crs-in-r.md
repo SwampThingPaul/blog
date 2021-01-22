@@ -13,18 +13,14 @@ layout: post
 <pre><code>There is nothing more deceptive than an obvious fact.
 - Arthur Conan Doyle, The Boscombe Valley Mystery</code></pre>
 <p>If you haven’t heard already, big changes are afoot in the <a href="https://rspatial.org/" target="_blank">R-spatial</a> community. <img src="{{ site.url }}{{ site.baseurl }}\images\20210121_CRS\sherlock_afoot.gif" width="50%" style="display: block; margin: auto;" /></p>
-<p>…if you were/are like me you experienced a mix of emotions. But not to worry there are loads of resources and a people working the issues right now.</p>
+<p>…if you were/are like me you experienced a mix of emotions. But not to worry there are loads of resources and a lot of really smart people working the issues right now.</p>
 <p><img src="{{ site.url }}{{ site.baseurl }}\images\20210121_CRS\sherlock_shcoked.gif" width="40%" style="display: block; margin: auto;" /></p>
-<p>…so expect lots of blog posts and resources from people.</p>
+<p>…so expect lots of blog posts and resources.</p>
 <hr />
-<p>The cliff notes version (short, short version) is that changes in the representation of coordinate reference systems (CRS) have finally caught up with how spatial data is handled in R packages. In a vignette, <a href="https://twitter.com/RogerBivand" target="_blank">Roger Bivand</a> explains the nitty gritty title <a href="https://rgdal.r-forge.r-project.org/articles/CRS_projections_transformations.html" target="_blank"><em>“Why have CRS, projections and transformations”</em></a>.</p>
-<ul>
-<li>YouTube lecture by Roger Bivand (<a href="https://youtu.be/2H1Tn4oN32M" target="_blank">link</a>)</li>
-<li>Associated material (<a href="https://rsbivand.github.io/ECS530_h20/ECS530_III.html" target="_blank">link</a>)</li>
-<li>Bivand, R.S. Progress in the R ecosystem for representing and handling spatial data. J Geogr Syst (2020). <a href="https://doi.org/10.1007/s10109-020-00336-0" target="_blank">https://doi.org/10.1007/s10109-020-00336-0</a></li>
-</ul>
+<p>The cliff notes version (short, short version) is that changes in how the representation of coordinate reference systems (CRS) have finally caught up with how spatial data is handled in R packages (or maybe its the otherway around). In a vignette titled title <a href="https://rgdal.r-forge.r-project.org/articles/CRS_projections_transformations.html" target="_blank"><em>“Why have CRS, projections and transformations”</em></a>, <a href="https://twitter.com/RogerBivand" target="_blank">Roger Bivand</a> explains the nitty gritty.</p>
+<p>Here are some more resources: * YouTube lecture by Roger Bivand (<a href="https://youtu.be/2H1Tn4oN32M" target="_blank">link</a>) * Associated material (<a href="https://rsbivand.github.io/ECS530_h20/ECS530_III.html" target="_blank">link</a>) * Bivand, R.S. Progress in the R ecosystem for representing and handling spatial data. J Geogr Syst (2020). <a href="https://doi.org/10.1007/s10109-020-00336-0" target="_blank">https://doi.org/10.1007/s10109-020-00336-0</a></p>
 <p>Roger also penned this post explaining the migration specific for the <code>rgdal</code>, <code>sp</code> and <code>raster</code> packages specific to read, write, project, and transform objects using PROJ strings (<a href="https://cran.r-project.org/web/packages/rgdal/vignettes/PROJ6_GDAL3.html#Migration_to_PROJ6GDAL3" target="_blank"><em>“Migration to PROJ6/GDAL3”</em></a>). It gets rather complex but a good resource.</p>
-<p>In another resource I came across in my sleuthing and troubleshooting Edzer Pebesma and Roger Bivand discusses how <a href="https://gdal.org/" target="_blank">GDAL</a> and <a href="https://proj.org" target="_blank">PROJ</a> (formerly proj.4) relates to geospatial tools including several <code>R</code> packages in a post <a href="https://www.r-spatial.org/r/2020/03/17/wkt.html" target="_blank"><em>“R spatial follows GDAL and PROJ developement”</em></a>. As an example they outline the dependency for package sf is for instance pictured here:</p>
+<p>In another resource I came across in my sleuthing and troubleshooting by Edzer Pebesma and Roger Bivand discussing how <a href="https://gdal.org/" target="_blank">GDAL</a> and <a href="https://proj.org" target="_blank">PROJ</a> (formerly proj.4) relates to geospatial tools including several <code>R</code> packages in a post titled <a href="https://www.r-spatial.org/r/2020/03/17/wkt.html" target="_blank"><em>“R spatial follows GDAL and PROJ developement”</em></a>. As an example, they outline the dependency for the <code>sf</code> package, pictured here:</p>
 <p><img src="https://keen-swartz-3146c4.netlify.com/images/sf_deps.png" width="75%" style="display: block; margin: auto;" /></p>
 <p>Also something worth reiterating here, briefly:</p>
 <ul>
@@ -35,19 +31,19 @@ layout: post
 <p>We are ultimately dealing with coordinate reference systems (or CRS) but it also goes by another name…spatial reference system (SRS). This might make more sense soon. As summarized by <a href="https://github.com/inbo" target="_blank">INBO</a>, CRS are defined by several elements:</p>
 <ul>
 <li>a coordinate system,</li>
-<li>a ‘datum’; it localizes the geodetic coordinate system relative to the Earth and needs a geometric definition of the ellipsoid,</li>
-<li>only for projected CRSes: coordinate conversion parameters that determine the conversion from the geodetic to the projected coordinates.</li>
+<li>a ‘datum’; it localizes the geodetic coordinate system relative to the Earth and needs a geometric definition of the ellipsoid, and</li>
+<li>only for projected CRSes coordinate conversion parameters that determine the conversion from the geodetic to the projected coordinates.</li>
 </ul>
-<p><a href="https://github.com/inbo" target="_blank">INBO</a> did a fantastic tutorial (<a href="https://inbo.github.io/tutorials/tutorials/spatial_crs_coding/" target="_blank">https://inbo.github.io/tutorials/tutorials/spatial_crs_coding/</a>) on the changes walking through the how-to for <code>sp</code>, <code>sf</code> and <code>raster</code> packages. The <code>rgdal</code> package leans heavily on the <code>sp</code> package…incase you were worried.</p>
+<p><a href="https://github.com/inbo" target="_blank">INBO</a> did a fantastic tutorial (<a href="https://inbo.github.io/tutorials/tutorials/spatial_crs_coding/" target="_blank">https://inbo.github.io/tutorials/tutorials/spatial_crs_coding/</a>) briefly discussing on the changes and walking through the how-to for <code>sp</code>, <code>sf</code> and <code>raster</code> packages. The <code>rgdal</code> package leans heavily on the <code>sp</code> package…incase you were worried.</p>
 <hr />
 <p>Here are some examples and things that I have learned dealing with this issue. Nothing special and I suggest visiting the resources identified above (especially <a href="https://inbo.github.io/tutorials/tutorials/spatial_crs_coding/" target="_blank">https://inbo.github.io/tutorials/tutorials/spatial_crs_coding/</a>). I am partial to the <code>sp</code> and <code>rgdal</code> packages, this is what I initially learned and got comfortable using. So lets load <code>rgdal</code>.</p>
 <div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(rgdal)</span></code></pre></div>
-<p>In the good’ol days you could define a CRS with this</p>
+<p>In the “good’ol days” you could define a CRS with this</p>
 <pre><code>utm17 &lt;- CRS(&quot;+proj=utm +zone=17 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs&quot;)</code></pre>
 <p>Do this now and you get…</p>
 <pre><code>## Warning in showSRID(uprojargs, format = &quot;PROJ&quot;, multiline = &quot;NO&quot;, prefer_proj =
 ## prefer_proj): Discarded datum Unknown based on GRS80 ellipsoid in CRS definition</code></pre>
-<p>There might be several ways to do this but the easiest I found is</p>
+<p>Fast-forward to now. There might be several ways to do this but the easiest I found is</p>
 <div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>utm17 <span class="ot">&lt;-</span> <span class="fu">CRS</span>(<span class="at">SRS_string=</span><span class="st">&quot;EPSG:4326&quot;</span>)</span></code></pre></div>
 <p>Notice the the argument <code>SRS_string</code> … as in spatial reference system! (I just picked that up writing this post).</p>
 <p>Another thing in the update is the use of WKT (well-known text) over that of PROJ strings. WKT strings are interesting and provides lots of good information on the CRS (or SRS) if your into that kind of thing. To make a WKT you use the <code>wkt()</code> function.</p>

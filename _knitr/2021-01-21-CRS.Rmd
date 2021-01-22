@@ -25,26 +25,27 @@ If you haven't heard already, big changes are afoot in the [R-spatial](https://r
 knitr::include_graphics("../images/20210121_CRS/sherlock_afoot.gif")
 ```
 
-...if you were/are like me you experienced a mix of emotions. But not to worry there are loads of resources and a people working the issues right now. 
+...if you were/are like me you experienced a mix of emotions. But not to worry there are loads of resources and a lot of really smart people working the issues right now. 
 
 ```{r, out.width="40%",echo=FALSE,fig.align="center"}
 knitr::include_graphics("../images/20210121_CRS/sherlock_shcoked.gif")
 ```
 
-...so expect lots of blog posts and resources from people.
+...so expect lots of blog posts and resources.
 
 ***
 
-The cliff notes version (short, short version) is that changes in the representation of coordinate reference systems (CRS) have finally caught up with how spatial data is handled in R packages. In a vignette, [Roger Bivand](https://twitter.com/RogerBivand){target="_blank"} explains the nitty gritty title [_"Why have CRS, projections and transformations"_](https://rgdal.r-forge.r-project.org/articles/CRS_projections_transformations.html){target="_blank"}.
+The cliff notes version (short, short version) is that changes in how the representation of coordinate reference systems (CRS) have finally caught up with how spatial data is handled in R packages (or maybe its the otherway around). In a vignette titled title [_"Why have CRS, projections and transformations"_](https://rgdal.r-forge.r-project.org/articles/CRS_projections_transformations.html){target="_blank"}, [Roger Bivand](https://twitter.com/RogerBivand){target="_blank"} explains the nitty gritty.
 
+Here are some more resources: 
 * YouTube lecture by Roger Bivand ([link](https://youtu.be/2H1Tn4oN32M){target="_blank"})
 * Associated material ([link](https://rsbivand.github.io/ECS530_h20/ECS530_III.html){target="_blank"})
 * Bivand, R.S. Progress in the R ecosystem for representing and handling spatial data. J Geogr Syst (2020). [https://doi.org/10.1007/s10109-020-00336-0](https://doi.org/10.1007/s10109-020-00336-0){target="_blank"}
 
 Roger also penned this post explaining the migration specific for the `rgdal`, `sp` and `raster` packages specific to read, write, project, and transform objects using PROJ strings ([_"Migration to PROJ6/GDAL3"_](https://cran.r-project.org/web/packages/rgdal/vignettes/PROJ6_GDAL3.html#Migration_to_PROJ6GDAL3){target="_blank"}). It gets rather complex but a good resource.  
 
-In another resource I came across in my sleuthing and troubleshooting Edzer Pebesma and Roger Bivand discusses how [GDAL](https://gdal.org/){target="_blank"} and [PROJ](https://proj.org){target="_blank"} (formerly
-proj.4) relates to geospatial tools including several `R` packages in a post [_"R spatial follows GDAL and PROJ developement"_](https://www.r-spatial.org/r/2020/03/17/wkt.html){target="_blank"}. As an example they outline the dependency for package sf is for instance pictured here:
+In another resource I came across in my sleuthing and troubleshooting by Edzer Pebesma and Roger Bivand discussing how [GDAL](https://gdal.org/){target="_blank"} and [PROJ](https://proj.org){target="_blank"} (formerly
+proj.4) relates to geospatial tools including several `R` packages in a post titled [_"R spatial follows GDAL and PROJ developement"_](https://www.r-spatial.org/r/2020/03/17/wkt.html){target="_blank"}. As an example, they outline the dependency for the `sf` package, pictured here:
 
 ```{r, out.width="75%",echo=FALSE,fig.align="center"}
 knitr::include_graphics("https://keen-swartz-3146c4.netlify.com/images/sf_deps.png")
@@ -64,10 +65,10 @@ for these data structures, including the representation of coordinate reference 
 We are ultimately dealing with coordinate reference systems (or CRS) but it also goes by another name...spatial reference system (SRS). This might make more sense soon. As summarized by [INBO](https://github.com/inbo){target="_blank"}, CRS are defined by several elements:
 
 * a coordinate system,
-* a ‘datum’; it localizes the geodetic coordinate system relative to the Earth and needs a geometric definition of the ellipsoid,
-* only for projected CRSes: coordinate conversion parameters that determine the conversion from the geodetic to the projected coordinates.
+* a ‘datum’; it localizes the geodetic coordinate system relative to the Earth and needs a geometric definition of the ellipsoid, and
+* only for projected CRSes coordinate conversion parameters that determine the conversion from the geodetic to the projected coordinates.
 
-[INBO](https://github.com/inbo){target="_blank"} did a fantastic tutorial ([https://inbo.github.io/tutorials/tutorials/spatial_crs_coding/](https://inbo.github.io/tutorials/tutorials/spatial_crs_coding/){target="_blank"}) on the changes walking through the how-to for `sp`, `sf` and `raster` packages. The `rgdal` package leans heavily on the `sp` package...incase you were worried.  
+[INBO](https://github.com/inbo){target="_blank"} did a fantastic tutorial ([https://inbo.github.io/tutorials/tutorials/spatial_crs_coding/](https://inbo.github.io/tutorials/tutorials/spatial_crs_coding/){target="_blank"}) briefly discussing on the changes and walking through the how-to for `sp`, `sf` and `raster` packages. The `rgdal` package leans heavily on the `sp` package...incase you were worried.  
 
 ***
 
@@ -77,7 +78,7 @@ Here are some examples and things that I have learned dealing with this issue. N
 library(rgdal)
 ```
 
-In the good'ol days you could define a CRS with this
+In the "good'ol days" you could define a CRS with this
 
 ```
 utm17 <- CRS("+proj=utm +zone=17 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs")
@@ -89,7 +90,7 @@ Do this now and you get...
 utm17 <- CRS("+proj=utm +zone=17 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs")
 ```
 
-There might be several ways to do this but the easiest I found is 
+Fast-forward to now. There might be several ways to do this but the easiest I found is 
 
 ```{r,eval=F}
 utm17 <- CRS(SRS_string="EPSG:4326")
