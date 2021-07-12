@@ -1,5 +1,5 @@
 ---
-title: "It�s Not Easy Being Green: Evaluating Algal Dynamics within the Okeechobee-Caloosahatchee System"
+title: "Evaluating Algal Dynamics within the Okeechobee-Caloosahatchee System"
 
 
 date: "June 30, 2021"
@@ -9,6 +9,8 @@ layout: post
 <script src="{{ site.url }}{{ site.baseurl }}/knitr_files/2021-06-30-Algae_files/header-attrs-2.7/header-attrs.js"></script>
 
 <section class="main-content">
+<div id="its-not-easy-being-green-evaluating-algal-dynamics-within-the-okeechobee-caloosahatchee-system" class="section level2">
+<h2><em>It’s Not Easy Being Green: Evaluating Algal Dynamics within the Okeechobee-Caloosahatchee System</em></h2>
 <p><strong>Keywords:</strong> Okeechobee, Caloosahatchee, Algae</p>
 <p>Original article published as a <a href="http://www.sccf.org/our-work/wednesday-update" target="_blank">SCCF</a> Wednesday Update.</p>
 <hr />
@@ -25,4 +27,5 @@ layout: post
 <p><strong>Hydrologic Modeler Paul Julian’s position is funded jointly by SCCF and The Conservancy of Southwest Florida.</strong></p>
 <hr />
 <p>More information on LOSOM can be found at the USACE LOSOM project <a href="https://www.saj.usace.army.mil/LOSOM/" target="_blank">webpage</a></p>
+</div>
 </section>

@@ -1,5 +1,5 @@
 ---
-title: "It’s Not Easy Being Green: Evaluating Algal Dynamics within the Okeechobee-Caloosahatchee System"
+title: "Evaluating Algal Dynamics within the Okeechobee-Caloosahatchee System"
 date: "June 30, 2021"
 output: 
   prettydoc::html_pretty:
@@ -8,7 +8,9 @@ highlight: github
 editor_options: 
   chunk_output_type: console
 ---
-  
+
+## *It’s Not Easy Being Green: Evaluating Algal Dynamics within the Okeechobee-Caloosahatchee System*
+
 __Keywords:__ Okeechobee, Caloosahatchee, Algae
 
 
