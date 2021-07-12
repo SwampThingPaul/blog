@@ -59,3 +59,5 @@ knit.clean=function(post.name){
 # knit.clean("2020-10-08-NN_HotSpot")
 
 # knit.clean("2021-01-21-CRS")
+
+# knit.clean("2021-04-22-GEER")
